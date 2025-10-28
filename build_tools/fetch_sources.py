@@ -390,6 +390,19 @@ def main(argv):
         ),
     )
     parser.add_argument(
+        "--media-projects",
+        nargs="+",
+        type=str,
+        default=(
+            []
+            if is_windows()
+            else [
+                # Linux only projects.
+                "amd-mesa",
+            ]
+        ),
+    )
+    parser.add_argument(
         # projects that use DVC to manage large files
         "--dvc-projects",
         nargs="+",
