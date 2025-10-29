@@ -386,6 +386,7 @@ def main(argv):
             else [
                 # Linux only projects.
                 "composable_kernel",
+                "mesa-fork",
             ]
         ),
     )
