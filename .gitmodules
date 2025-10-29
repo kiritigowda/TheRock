@@ -45,7 +45,7 @@
 	path = base/amdsmi
 	url = https://github.com/ROCm/amdsmi.git
 	branch = amd-staging
-[submodule "amd-mesa"]
+[submodule "mesa-fork"]
 	path = third-party/sysdeps/linux/amd-mesa/mesa-fork
 	url = https://github.com/ROCm/mesa-fork.git
 	branch = amd-decode-only

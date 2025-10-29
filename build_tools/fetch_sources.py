@@ -398,7 +398,7 @@ def main(argv):
             if is_windows()
             else [
                 # Linux only projects.
-                "amd-mesa",
+                "mesa-fork",
             ]
         ),
     )
