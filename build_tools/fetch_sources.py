@@ -377,7 +377,7 @@ def main(argv):
         ],
     )
     parser.add_argument(
-        "--ml-framework-projects",
+        "--linux-only-projects",
         nargs="+",
         type=str,
         default=(
@@ -386,6 +386,7 @@ def main(argv):
             else [
                 # Linux only projects.
                 "composable_kernel",
+                "amd-mesa",
             ]
         ),
     )
