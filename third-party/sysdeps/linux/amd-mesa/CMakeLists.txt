@@ -1,0 +1,77 @@
+if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # When included in TheRock, we download sources and set up the sub-project.
+    set(_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork")
+
+    therock_cmake_subproject_declare(therock-amd-mesa
+      EXTERNAL_SOURCE_DIR .
+      BINARY_DIR build
+      NO_MERGE_COMPILE_COMMANDS
+      BACKGROUND_BUILD
+      OUTPUT_ON_FAILURE
+      CMAKE_ARGS
+        "-DSOURCE_DIR=${_source_dir}"
+        "-DPATCHELF=${PATCHELF}"
+        "-DMESON_BUILD=${MESON_BUILD}"
+        "-DPython3_EXECUTABLE=${Python3_EXECUTABLE}"
+      RUNTIME_DEPS
+        therock-libdrm
+      INSTALL_DESTINATION
+        lib/rocm_sysdeps
+      INTERFACE_LINK_DIRS
+        lib/rocm_sysdeps/lib
+      INTERFACE_INSTALL_RPATH_DIRS
+        lib/rocm_sysdeps/lib
+      INTERFACE_PKG_CONFIG_DIRS
+        lib/rocm_sysdeps/lib/pkgconfig
+    )
+    therock_cmake_subproject_activate(therock-amd-mesa)
+
+    therock_test_validate_shared_lib(
+      PATH build/dist/lib/rocm_sysdeps/lib
+      LIB_NAMES libgallium_drv_video.so radeonsi_drv_video.so
+    )
+    return()
+endif()
+
+# Otherwise, this is the sub-project build.
+cmake_minimum_required(VERSION 3.25)
+project(MESA_BUILD)
+if(NOT PATCHELF OR NOT MESON_BUILD)
+  message(FATAL_ERROR "Missing PATCHELF or MESON_BUILD from super-project")
+endif()
+
+add_custom_target(
+  meson_build ALL
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND
+    "${CMAKE_COMMAND}" -E env
+      # Escaping hack: experimentally determined to persist through the layers.
+      "LDFLAGS=-Wl,-rpath='$$ORIGIN' -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version.lds"
+      --
+      "${MESON_BUILD}" setup
+        --reconfigure
+        # We generate relocatable, arch neutral directory layouts and use
+        # DESTDIR to install it to the lib/rocm_sysdeps tree.
+        --prefix "/"
+        -Dpkgconfig.relocatable=true
+        -Dlibdir=lib
+        -Dva-libs-path="/lib"
+        #-Dallow-fallback-for=libva # build local va library
+        -Dpkg_config_path="${CMAKE_CURRENT_BINARY_DIR}"/../../../libdrm/build/dist/lib/rocm_sysdeps/lib/pkgconfig
+        # Only enable the decode for rocm
+        -Damd-decode-only=true
+        "${CMAKE_CURRENT_BINARY_DIR}/build-mesa"
+        "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork"
+
+  COMMAND
+    "${MESON_BUILD}" compile -C "${CMAKE_CURRENT_BINARY_DIR}/build-mesa" --verbose
+  COMMAND
+    "${CMAKE_COMMAND}" -E env "DESTDIR=${CMAKE_INSTALL_PREFIX}" --
+      "${MESON_BUILD}" install -C "${CMAKE_CURRENT_BINARY_DIR}/build-mesa"
+  COMMAND
+    "${CMAKE_COMMAND}" -E env
+      "PATCHELF=${PATCHELF}"
+      "THEROCK_SOURCE_DIR=${THEROCK_SOURCE_DIR}"
+      "Python3_EXECUTABLE=${Python3_EXECUTABLE}" --
+    "${CMAKE_CURRENT_SOURCE_DIR}/patch_install.sh" ${CMAKE_INSTALL_PREFIX}
+)
