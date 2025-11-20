@@ -4,7 +4,7 @@ if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
     therock_cmake_subproject_declare(therock-amd-mesa
       EXTERNAL_SOURCE_DIR .
-      BINARY_DIR build
+      BINARY_DIR build-mesa
       NO_MERGE_COMPILE_COMMANDS
       BACKGROUND_BUILD
       OUTPUT_ON_FAILURE
@@ -36,6 +36,14 @@ endif()
 # Otherwise, this is the sub-project build.
 cmake_minimum_required(VERSION 3.25)
 project(MESA_BUILD)
+
+if(NOT MESON_BUILD)
+  find_program(MESON_BUILD meson)
+    if(NOT MESON_BUILD)
+      message(FATAL_ERROR "Building with THEROCK_BUNDLE_SYSDEPS=ON on Linux requires (easiest: `pip install meson`)")
+    endif()
+endif()
+
 if(NOT PATCHELF OR NOT MESON_BUILD)
   message(FATAL_ERROR "Missing PATCHELF or MESON_BUILD from super-project")
 endif()
@@ -52,26 +60,25 @@ add_custom_target(
         --reconfigure
         # We generate relocatable, arch neutral directory layouts and use
         # DESTDIR to install it to the lib/rocm_sysdeps tree.
-        --prefix "/"
+        --prefix "${CMAKE_INSTALL_PREFIX}"
         -Dpkgconfig.relocatable=true
         -Dlibdir=lib
         -Dva-libs-path="/lib"
-        #-Dallow-fallback-for=libva # build local va library
+        #-Dallow-fallback-for=libva # NOTE: build local va library
         -Dpkg_config_path="${CMAKE_CURRENT_BINARY_DIR}"/../../../libdrm/build/dist/lib/rocm_sysdeps/lib/pkgconfig
-        # Only enable the decode for rocm
-        -Damd-decode-only=true
-        "${CMAKE_CURRENT_BINARY_DIR}/build-mesa"
+        -Damd-decode-only=true # NOTE: Only enable the decode for rocm
+        "${CMAKE_CURRENT_BINARY_DIR}"
         "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork"
 
   COMMAND
-    "${MESON_BUILD}" compile -C "${CMAKE_CURRENT_BINARY_DIR}/build-mesa" --verbose
+    "${MESON_BUILD}" compile -C "${CMAKE_CURRENT_BINARY_DIR}" --verbose
   COMMAND
     "${CMAKE_COMMAND}" -E env "DESTDIR=${CMAKE_INSTALL_PREFIX}" --
-      "${MESON_BUILD}" install -C "${CMAKE_CURRENT_BINARY_DIR}/build-mesa"
-  COMMAND
-    "${CMAKE_COMMAND}" -E env
-      "PATCHELF=${PATCHELF}"
-      "THEROCK_SOURCE_DIR=${THEROCK_SOURCE_DIR}"
-      "Python3_EXECUTABLE=${Python3_EXECUTABLE}" --
-    "${CMAKE_CURRENT_SOURCE_DIR}/patch_install.sh" ${CMAKE_INSTALL_PREFIX}
+      "${MESON_BUILD}" install -C "${CMAKE_CURRENT_BINARY_DIR}"
+  #COMMAND
+    #"${CMAKE_COMMAND}" -E env
+    #  "PATCHELF=${PATCHELF}"
+    #  "THEROCK_SOURCE_DIR=${THEROCK_SOURCE_DIR}"
+    #  "Python3_EXECUTABLE=${Python3_EXECUTABLE}" --
+    #"${CMAKE_CURRENT_SOURCE_DIR}/patch_install.sh" ${CMAKE_INSTALL_PREFIX}
 )
