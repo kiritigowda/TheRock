@@ -3,6 +3,7 @@ if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork")
 
     therock_cmake_subproject_declare(therock-amd-mesa
+      SOURCE_DIR "${_source_dir}"
       EXTERNAL_SOURCE_DIR .
       BINARY_DIR build
       NO_MERGE_COMPILE_COMMANDS
@@ -52,6 +53,8 @@ add_custom_target(
   meson_build ALL
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND
+    "${CMAKE_COMMAND}" -E rm -rf -- "${CMAKE_INSTALL_PREFIX}"
+  COMMAND
     "${CMAKE_COMMAND}" -E env
       # Escaping hack: experimentally determined to persist through the layers.
       "LDFLAGS=-Wl,-rpath='$$ORIGIN' -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version.lds"
@@ -60,7 +63,7 @@ add_custom_target(
         --reconfigure
         # We generate relocatable, arch neutral directory layouts and use
         # DESTDIR to install it to the lib/rocm_sysdeps tree.
-        --prefix "${CMAKE_INSTALL_PREFIX}"
+        --prefix "/"
         -Dpkgconfig.relocatable=true
         -Dlibdir=lib
         -Dva-libs-path="/lib"
@@ -71,14 +74,14 @@ add_custom_target(
         "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork"
 
   COMMAND
-    "${MESON_BUILD}" compile -C "${CMAKE_CURRENT_BINARY_DIR}" --verbose
+    "${MESON_BUILD}" compile --verbose
   COMMAND
     "${CMAKE_COMMAND}" -E env "DESTDIR=${CMAKE_INSTALL_PREFIX}" --
-      "${MESON_BUILD}" install -C "${CMAKE_CURRENT_BINARY_DIR}"
-  #COMMAND
-    #"${CMAKE_COMMAND}" -E env
-    #  "PATCHELF=${PATCHELF}"
-    #  "THEROCK_SOURCE_DIR=${THEROCK_SOURCE_DIR}"
-    #  "Python3_EXECUTABLE=${Python3_EXECUTABLE}" --
-    #"${CMAKE_CURRENT_SOURCE_DIR}/patch_install.sh" ${CMAKE_INSTALL_PREFIX}
+      "${MESON_BUILD}" install
+  COMMAND
+    "${CMAKE_COMMAND}" -E env
+      "PATCHELF=${PATCHELF}"
+      "THEROCK_SOURCE_DIR=${THEROCK_SOURCE_DIR}"
+      "Python3_EXECUTABLE=${Python3_EXECUTABLE}" --
+    "${CMAKE_CURRENT_SOURCE_DIR}/patch_install.sh" ${CMAKE_INSTALL_PREFIX}
 )
