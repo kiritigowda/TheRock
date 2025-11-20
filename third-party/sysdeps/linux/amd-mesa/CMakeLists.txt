@@ -4,7 +4,7 @@ if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
     therock_cmake_subproject_declare(therock-amd-mesa
       EXTERNAL_SOURCE_DIR .
-      BINARY_DIR build-mesa
+      BINARY_DIR build
       NO_MERGE_COMPILE_COMMANDS
       BACKGROUND_BUILD
       OUTPUT_ON_FAILURE
