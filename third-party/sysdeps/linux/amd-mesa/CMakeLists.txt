@@ -3,7 +3,6 @@ if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork")
 
     therock_cmake_subproject_declare(therock-amd-mesa
-      SOURCE_DIR "${_source_dir}"
       EXTERNAL_SOURCE_DIR .
       BINARY_DIR build
       NO_MERGE_COMPILE_COMMANDS
@@ -49,17 +48,25 @@ if(NOT PATCHELF OR NOT MESON_BUILD)
   message(FATAL_ERROR "Missing PATCHELF or MESON_BUILD from super-project")
 endif()
 
+# Meson refuses to build if the source dir is a subdir of the build dir, so
+# make it a sibling.
+set(PATCH_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/../patch_source")
+
 add_custom_target(
   meson_build ALL
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND
-    "${CMAKE_COMMAND}" -E rm -rf -- "${CMAKE_INSTALL_PREFIX}"
+    "${CMAKE_COMMAND}" -E rm -rf -- "${CMAKE_INSTALL_PREFIX}" "${PATCH_SOURCE_DIR}"
+    COMMAND
+    # We have to patch the sources so make a fresh copy.
+    "${CMAKE_COMMAND}" -E copy_directory "${SOURCE_DIR}" "${PATCH_SOURCE_DIR}"
   COMMAND
+    "${CMAKE_COMMAND}" -E chdir "${PATCH_SOURCE_DIR}"
     "${CMAKE_COMMAND}" -E env
       # Escaping hack: experimentally determined to persist through the layers.
       "LDFLAGS=-Wl,-rpath='$$ORIGIN' -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version.lds"
       --
-      "${MESON_BUILD}" setup
+      "${MESON_BUILD}" setup "${CMAKE_CURRENT_BINARY_DIR}"
         --reconfigure
         # We generate relocatable, arch neutral directory layouts and use
         # DESTDIR to install it to the lib/rocm_sysdeps tree.
@@ -70,9 +77,6 @@ add_custom_target(
         #-Dallow-fallback-for=libva # NOTE: build local va library
         -Dpkg_config_path="${CMAKE_CURRENT_BINARY_DIR}"/../../../libdrm/build/dist/lib/rocm_sysdeps/lib/pkgconfig
         -Damd-decode-only=true # NOTE: Only enable the decode for rocm
-        "${CMAKE_CURRENT_BINARY_DIR}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/mesa-fork"
-
   COMMAND
     "${MESON_BUILD}" compile --verbose
   COMMAND
