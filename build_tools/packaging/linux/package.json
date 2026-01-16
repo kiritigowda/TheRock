@@ -1748,7 +1748,7 @@
     "DisablePackaging": "True"
   },
   {
-    "Package": "amdrocm-openmp",
+    "Package": "amdrocm-media",
     "Version": "",
     "Architecture": "amd64",
     "BuildArch": "x86_64",
@@ -1799,6 +1799,30 @@
     "Homepage": "https://github.com/ROCm/rocm-libraries",
     "Metapackage": "True",
     "Gfxarch": "True"
+  },
+  {
+    "Package": "amdrocm-media",
+    "Version": "",
+    "Architecture": "amd64",
+    "BuildArch": "x86_64",
+    "DEBDepends": [
+      "amdrocm-core-dev"
+    ],
+    "RPMRequires": [
+      "amdrocm-core-devel"
+    ],
+    "Maintainer": "ROCm Dev Support <rocm-dev.support@amd.com>",
+    "Description_Short": "AMD ROCm Media Libraries",
+    "Description_Long": "ROCm Media",
+    "Section": "devel",
+    "Priority": "optional",
+    "Group": "media",
+    "License": "MIT",
+    "Vendor": "Advanced Micro Devices, Inc",
+    "Homepage": "https://github.com/ROCm/rocDecode",
+    "Metapackage": "True",
+    "Gfxarch": "False",
+    "DisablePackaging": "True"
   }
 
 ]
