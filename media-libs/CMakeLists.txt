@@ -11,13 +11,17 @@ therock_cmake_subproject_declare(rocdecode
     OUTPUT_ON_FAILURE
     EXTERNAL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rocdecode"
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocdecode"
+    COMPILER_TOOLCHAIN
+      amd-hip
     RUNTIME_DEPS
       rocprofiler-register
+      ${THEROCK_BUNDLED_LIBDRM}
+      ${THEROCK_BUNDLED_AMDMESA}
     BUILD_DEPS
       amd-llvm
+      rocprofiler-register
       ${THEROCK_BUNDLED_LIBDRM}
-      ${THEROCK_BUNDLED_LIBVA}
-      ${THEROCK_BUNDLED_LIBVADRM}
+      ${THEROCK_BUNDLED_AMDMESA}
     CMAKE_ARGS
       -DHIP_PLATFORM=amd
     INTERFACE_LINK_DIRS
@@ -57,15 +61,17 @@ therock_cmake_subproject_declare(rocdecode
     OUTPUT_ON_FAILURE
     EXTERNAL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rocjpeg"
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/rocjpeg"
-    CMAKE_ARGS
-      -DHIP_PLATFORM=amd
+    COMPILER_TOOLCHAIN
+      amd-hip
     RUNTIME_DEPS
       rocprofiler-register
+      ${THEROCK_BUNDLED_LIBDRM}
+      ${THEROCK_BUNDLED_AMDMESA}
     BUILD_DEPS
       amd-llvm
+      rocprofiler-register
       ${THEROCK_BUNDLED_LIBDRM}
-      ${THEROCK_BUNDLED_LIBVA}
-      ${THEROCK_BUNDLED_LIBVADRM}
+      ${THEROCK_BUNDLED_AMDMESA}
     CMAKE_ARGS
       -DHIP_PLATFORM=amd
     INTERFACE_LINK_DIRS
