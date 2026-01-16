@@ -17,6 +17,7 @@ therock_cmake_subproject_declare(rocdecode
       rocprofiler-register
       ${THEROCK_BUNDLED_LIBDRM}
       ${THEROCK_BUNDLED_AMDMESA}
+      hip-clr
     BUILD_DEPS
       amd-llvm
       rocprofiler-register
@@ -67,6 +68,7 @@ therock_cmake_subproject_declare(rocjpeg
       rocprofiler-register
       ${THEROCK_BUNDLED_LIBDRM}
       ${THEROCK_BUNDLED_AMDMESA}
+      hip-clr
     BUILD_DEPS
       amd-llvm
       rocprofiler-register
