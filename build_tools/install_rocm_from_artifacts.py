@@ -203,6 +203,8 @@ def retrieve_artifacts_by_run_id(args):
             args.rocprofiler_systems,
             args.rocwmma,
             args.libhipcxx,
+            args.rocdecode,
+            args.rocjpeg,
         ]
     ):
         argv.extend(base_artifact_patterns)
@@ -230,6 +232,10 @@ def retrieve_artifacts_by_run_id(args):
             extra_artifacts.append("miopen-plugin")
         if args.fusilli_plugin:
             extra_artifacts.append("fusilli-plugin")
+        if args.rocdecode:
+            extra_artifacts.append("rocdecode")
+        if args.rocjpeg:
+            extra_artifacts.append("rocjpeg")
         if args.prim:
             extra_artifacts.append("prim")
         if args.rand:
@@ -418,6 +424,20 @@ def main(argv):
         "--fusilli-plugin",
         default=False,
         help="Include 'fusilli-plugin' artifacts",
+        action=argparse.BooleanOptionalAction,
+    )
+    
+    artifacts_group.add_argument(
+        "--rocdecode",
+        default=False,
+        help="Include 'rocdecode' artifacts",
+        action=argparse.BooleanOptionalAction,
+    )
+    
+    artifacts_group.add_argument(
+        "--rocjpeg",
+        default=False,
+        help="Include 'rocjpeg' artifacts",
         action=argparse.BooleanOptionalAction,
     )
 

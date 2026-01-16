@@ -1816,7 +1816,7 @@
     "Description_Long": "ROCm Media",
     "Section": "devel",
     "Priority": "optional",
-    "Group": "media",
+    "Group": "media-libs",
     "License": "MIT",
     "Vendor": "Advanced Micro Devices, Inc",
     "Homepage": "https://github.com/ROCm/rocDecode",

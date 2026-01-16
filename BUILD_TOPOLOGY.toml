@@ -119,6 +119,11 @@ disable_platforms = ["windows"]
 description = "IREE integration submodules"
 submodules = ["iree", "fusilli"]
 
+[source_sets.media-libs]
+description = "ROCm media libraries submodules"
+submodules = ["rocdecode", "rocjpeg"]
+disable_platforms = ["windows"]
+
 # ==============================================================================
 # BUILD STAGES - Pipeline jobs that build sets of artifact groups
 # ==============================================================================
@@ -176,6 +181,10 @@ artifact_groups = ["profiler-apps"]
 [build_stages.media]
 description = "Media Libraries"
 artifact_groups = ["media"]
+
+[build_stages.media-libs]
+description = "Media Libraries"
+artifact_groups = ["media-libs"]
 
 # ==============================================================================
 # ARTIFACT GROUPS - Logical groupings of related artifacts
@@ -292,6 +301,12 @@ artifact_group_deps = ["third-party-sysdeps", "base"]
 # TODO: rocm-systems included for projects/hip/VERSION (see CMakeLists.txt)
 # amd-mesa disabled on Windows via source_set
 source_sets = ["amd-mesa", "rocm-systems"]
+
+[artifact_groups.media-libs]
+description = "rocdecode and rocjpeg integration"
+type = "generic"
+artifact_group_deps = ["third-party-sysdeps"]
+source_sets = ["media-libs"]
 
 # ==============================================================================
 # ARTIFACTS - The actual build outputs that can be transmitted between stages
@@ -523,6 +538,20 @@ artifact_deps = ["core-runtime", "core-hip", "miopen", "hipdnn"]
 artifact_group = "iree-libs"
 type = "target-neutral"
 artifact_deps = ["core-runtime", "core-hip", "hipdnn"]
+disable_platforms = ["windows"]
+
+# --- Media Integration ---
+
+[artifacts.rocdecode]
+artifact_group = "media-libs"
+type = "target-neutral"
+artifact_deps = ["core-runtime", "core-hip", "base"]
+disable_platforms = ["windows"]
+
+[artifacts.rocjpeg]
+artifact_group = "media-libs"
+type = "target-neutral"
+artifact_deps = ["core-runtime", "core-hip", "base"]
 disable_platforms = ["windows"]
 
 # --- Communication Libraries (per-arch) ---
