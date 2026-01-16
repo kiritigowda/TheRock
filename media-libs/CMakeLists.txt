@@ -53,7 +53,7 @@ therock_cmake_subproject_declare(rocdecode
 # rocjpeg library
 ##############################################################################
 
-  therock_cmake_subproject_declare(rocjpeg
+therock_cmake_subproject_declare(rocjpeg
     USE_DIST_AMDGPU_TARGETS
     BACKGROUND_BUILD
     EXCLUDE_FROM_ALL
@@ -97,6 +97,4 @@ therock_cmake_subproject_declare(rocdecode
       test
     SUBPROJECT_DEPS
       rocjpeg
-  )
-
-endif(THEROCK_ENABLE_SYSDEPS_AMD_MESA)
+)
