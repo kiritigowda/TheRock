@@ -24,7 +24,7 @@ therock_cmake_subproject_declare(rocdecode
       ${THEROCK_BUNDLED_LIBDRM}
       ${THEROCK_BUNDLED_AMDMESA}
     CMAKE_ARGS
-      -DHIP_PLATFORM=amd
+      -DROCM_PATH=${CMAKE_BINARY_DIR}/dist/rocm
     INTERFACE_LINK_DIRS
       "lib"
     INSTALL_RPATH_DIRS
@@ -75,7 +75,7 @@ therock_cmake_subproject_declare(rocjpeg
       ${THEROCK_BUNDLED_LIBDRM}
       ${THEROCK_BUNDLED_AMDMESA}
     CMAKE_ARGS
-      -DHIP_PLATFORM=amd
+      -DROCM_PATH=${CMAKE_BINARY_DIR}/dist/rocm
     INTERFACE_LINK_DIRS
       "lib"
     INSTALL_RPATH_DIRS
