@@ -3,9 +3,6 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-import glob
-import shutil
-import json
 import sys
 import platform
 
@@ -18,7 +15,7 @@ if THEROCK_BIN_DIR_STR is None:
     sys.exit(1)
 THEROCK_BIN_DIR = Path(THEROCK_BIN_DIR_STR)
 SCRIPT_DIR = Path(__file__).resolve().parent
-THEROCK_DIR = SCRIPT_DIR.parent.parent.parent
+THEROCK_DIR = SCRIPT_DIR.parent.parent
 
 ROCDECODE_TEST_PATH = str(Path(THEROCK_BIN_DIR).parent / "share" / "rocdecode" / "test")
 if not os.path.isdir(ROCDECODE_TEST_PATH):
@@ -44,9 +41,7 @@ def setup_env(env):
         logging.info(f"++ rocdecode tests only supported on Linux")
         exit()
 
-
 def execute_tests(env):
-    
     ROCDECODE_TEST_DIR = Path(THEROCK_DIR) / "rocdecode-test"
     cmd = [
         "mkdir",
@@ -62,7 +57,7 @@ def execute_tests(env):
     ]
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
-    
+
     cmd = [
         "ctest",
         "--output-on-failure",

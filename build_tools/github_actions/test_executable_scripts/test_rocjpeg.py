@@ -3,9 +3,6 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-import glob
-import shutil
-import json
 import sys
 import platform
 
@@ -18,7 +15,7 @@ if THEROCK_BIN_DIR_STR is None:
     sys.exit(1)
 THEROCK_BIN_DIR = Path(THEROCK_BIN_DIR_STR)
 SCRIPT_DIR = Path(__file__).resolve().parent
-THEROCK_DIR = SCRIPT_DIR.parent.parent.parent
+THEROCK_DIR = SCRIPT_DIR.parent.parent
 
 ROCJPEG_TEST_PATH = str(Path(THEROCK_BIN_DIR).parent / "share" / "rocjpeg" / "test")
 if not os.path.isdir(ROCJPEG_TEST_PATH):
@@ -44,9 +41,7 @@ def setup_env(env):
         logging.info(f"++ rocjpeg tests only supported on Linux")
         exit()
 
-
 def execute_tests(env):
-    
     ROCJPEG_TEST_DIR = Path(THEROCK_DIR) / "rocjpeg-test"
     cmd = [
         "mkdir",

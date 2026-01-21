@@ -449,14 +449,14 @@ def main(argv):
         help="Include 'fusilli-plugin' artifacts",
         action=argparse.BooleanOptionalAction,
     )
-    
+
     artifacts_group.add_argument(
         "--rocdecode",
         default=False,
         help="Include 'rocdecode' artifacts",
         action=argparse.BooleanOptionalAction,
     )
-    
+
     artifacts_group.add_argument(
         "--rocjpeg",
         default=False,

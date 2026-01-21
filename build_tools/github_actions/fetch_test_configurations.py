@@ -268,7 +268,7 @@ test_matrix = {
         "total_shards": 1,
     },
     # rocdecode
-        "rocdecode": {
+    "rocdecode": {
         "job_name": "rocdecode",
         "fetch_artifact_args": "--rocdecode",
         "timeout_minutes": 60,
@@ -277,7 +277,7 @@ test_matrix = {
         "total_shards": 1,
     },
     # rocjpeg
-        "rocjpeg": {
+    "rocjpeg": {
         "job_name": "rocjpeg",
         "fetch_artifact_args": "--rocjpeg",
         "timeout_minutes": 60,

@@ -30,23 +30,31 @@ therock_cmake_subproject_declare(rocdecode
       "lib;lib/rocm_sysdeps/lib"
     INTERFACE_INSTALL_RPATH_DIRS
       "lib;lib/rocm_sysdeps/lib"
-  )
-  therock_cmake_subproject_glob_c_sources(rocdecode
-    SUBDIRS
-      .
-  )
-  therock_cmake_subproject_provide_package(rocdecode rocdecode lib/cmake/rocdecode)
-  therock_cmake_subproject_activate(rocdecode)
+)
+therock_cmake_subproject_glob_c_sources(rocdecode
+  SUBDIRS
+    .
+)
+therock_cmake_subproject_provide_package(rocdecode rocdecode lib/cmake/rocdecode)
+therock_cmake_subproject_activate(rocdecode)
+therock_test_validate_shared_lib(
+  PATH ${CMAKE_CURRENT_BINARY_DIR}/rocdecode/dist/lib
+  LIB_NAMES
+    librocdecode.so
+)
 
-  therock_provide_artifact(rocdecode
-    DESCRIPTOR artifact-rocdecode.toml
-    COMPONENTS
-      dbg
-      dev
-      lib
-      test
-    SUBPROJECT_DEPS
-      rocdecode
+therock_provide_artifact(rocdecode
+  TARGET_NEUTRAL
+  DESCRIPTOR
+    artifact-rocdecode.toml
+  COMPONENTS
+    dbg
+    dev
+    lib
+    test
+  SUBPROJECT_DEPS
+    ${THEROCK_BUNDLED_AMDMESA}
+    therock-rocdecode
 )
 
 ##############################################################################
@@ -81,21 +89,28 @@ therock_cmake_subproject_declare(rocjpeg
       "lib;lib/rocm_sysdeps/lib"
     INTERFACE_INSTALL_RPATH_DIRS
       "lib;lib/rocm_sysdeps/lib"
-  )
-  therock_cmake_subproject_glob_c_sources(rocjpeg
-    SUBDIRS
-      .
-  )
-  therock_cmake_subproject_provide_package(rocjpeg rocjpeg lib/cmake/rocjpeg)
-  therock_cmake_subproject_activate(rocjpeg)
-
-  therock_provide_artifact(rocjpeg
-    DESCRIPTOR artifact-rocjpeg.toml
-    COMPONENTS
-      dbg
-      dev
-      lib
-      test
-    SUBPROJECT_DEPS
-      rocjpeg
+)
+therock_cmake_subproject_glob_c_sources(rocjpeg
+  SUBDIRS
+    .
+)
+therock_cmake_subproject_provide_package(rocjpeg rocjpeg lib/cmake/rocjpeg)
+therock_cmake_subproject_activate(rocjpeg)
+therock_test_validate_shared_lib(
+  PATH ${CMAKE_CURRENT_BINARY_DIR}/rocjpeg/dist/lib
+  LIB_NAMES
+    librocjpeg.so
+)
+therock_provide_artifact(rocjpeg
+  TARGET_NEUTRAL
+  DESCRIPTOR
+    artifact-rocjpeg.toml
+  COMPONENTS
+    dbg
+    dev
+    lib
+    test
+  SUBPROJECT_DEPS
+    ${THEROCK_BUNDLED_AMDMESA}
+    therock-rocjpeg
 )
