@@ -282,6 +282,9 @@ test_matrix = {
         "fetch_artifact_args": "--rocjpeg",
         "timeout_minutes": 60,
         "test_script": f"python {_get_script_path('test_rocjpeg.py')}",
+        "platform": ["linux"],
+        "total_shards": 1,
+    },
     # aqlprofile tests
     "aqlprofile": {
         "job_name": "aqlprofile",
