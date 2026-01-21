@@ -24,6 +24,7 @@ if not os.path.isdir(ROCDECODE_TEST_PATH):
     sys.exit(1)
 env = os.environ.copy()
 
+
 def setup_env(env):
     # catch/ctest framework
     # Linux
@@ -41,6 +42,7 @@ def setup_env(env):
     else:
         logging.info(f"++ rocdecode tests only supported on Linux")
         exit()
+
 
 def execute_tests(env):
     ROCDECODE_TEST_DIR = Path(THEROCK_TEST_DIR) / "rocdecode-test"

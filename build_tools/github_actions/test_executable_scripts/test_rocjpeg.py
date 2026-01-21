@@ -24,6 +24,7 @@ if not os.path.isdir(ROCJPEG_TEST_PATH):
     sys.exit(1)
 env = os.environ.copy()
 
+
 def setup_env(env):
     # catch/ctest framework
     # Linux
@@ -41,6 +42,7 @@ def setup_env(env):
     else:
         logging.info(f"++ rocjpeg tests only supported on Linux")
         exit()
+
 
 def execute_tests(env):
     ROCJPEG_TEST_DIR = Path(THEROCK_TEST_DIR) / "rocjpeg-test"
@@ -65,6 +67,7 @@ def execute_tests(env):
     ]
     logging.info(f"++ Exec [{ROCJPEG_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCJPEG_TEST_DIR, check=True, env=env)
+
 
 if __name__ == "__main__":
     setup_env(env)
