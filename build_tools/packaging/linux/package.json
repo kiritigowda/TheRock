@@ -1860,7 +1860,7 @@
     "DisablePackaging": "True"
   },
   {
-    "Package": "amdrocm-media",
+    "Package": "amdrocm-openmp",
     "Version": "",
     "Architecture": "amd64",
     "BuildArch": "x86_64",
