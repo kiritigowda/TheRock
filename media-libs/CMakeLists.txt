@@ -54,7 +54,7 @@ therock_provide_artifact(rocdecode
     test
   SUBPROJECT_DEPS
     ${THEROCK_BUNDLED_AMDMESA}
-    therock-rocdecode
+    rocdecode
 )
 
 ##############################################################################
@@ -112,5 +112,5 @@ therock_provide_artifact(rocjpeg
     test
   SUBPROJECT_DEPS
     ${THEROCK_BUNDLED_AMDMESA}
-    therock-rocjpeg
+    rocjpeg
 )
