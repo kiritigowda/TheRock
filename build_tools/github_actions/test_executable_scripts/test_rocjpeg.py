@@ -19,7 +19,12 @@ THEROCK_DIR = SCRIPT_DIR.parent.parent.parent
 THEROCK_TEST_DIR = Path(THEROCK_DIR) / "build"
 
 ROCJPEG_TEST_PATH = str(
-    Path(THEROCK_BIN_DIR).resolve().parent / "share" / "rocjpeg" / "test"
+    Path(THEROCK_BIN_DIR).resolve().parent
+    / "dist"
+    / "rocm"
+    / "share"
+    / "rocjpeg"
+    / "test"
 )
 if not os.path.isdir(ROCJPEG_TEST_PATH):
     logging.info(f"++ Error: rocjpeg tests not found in {ROCJPEG_TEST_PATH}")
