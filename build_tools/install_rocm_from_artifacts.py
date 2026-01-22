@@ -16,6 +16,8 @@ python build_tools/install_rocm_from_artifacts.py
     (--run-id RUN_ID | --release RELEASE | --input-dir INPUT_DIR)
     [--run-github-repo RUN_GITHUB_REPO]
     [--aqlprofile | --no-aqlprofile]
+    [--rocdecode | --no-rocdecode]
+    [--rocjpeg | --no-rocjpeg]
     [--blas | --no-blas]
     [--debug-tools | --no-debug-tools]
     [--fft | --no-fft]
@@ -249,9 +251,15 @@ def retrieve_artifacts_by_run_id(args):
         if args.fusilli_plugin:
             extra_artifacts.append("fusilli-plugin")
         if args.rocdecode:
-            extra_artifacts.append("rocdecode")
+            extra_artifacts.append("rocdecode_lib")
+            extra_artifacts.append("rocdecode_dev")
+            extra_artifacts.append("rocdecode_test")
+            extra_artifacts.append("sysdeps-amd-mesa_lib")
         if args.rocjpeg:
-            extra_artifacts.append("rocjpeg")
+            extra_artifacts.append("rocjpeg_lib")
+            extra_artifacts.append("rocjpeg_dev")
+            extra_artifacts.append("rocjpeg_test")
+            extra_artifacts.append("sysdeps-amd-mesa_lib")
         if args.prim:
             extra_artifacts.append("prim")
         if args.rand:
