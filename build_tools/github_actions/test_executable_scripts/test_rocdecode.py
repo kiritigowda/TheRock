@@ -18,10 +18,12 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 THEROCK_DIR = SCRIPT_DIR.parent.parent.parent
 THEROCK_TEST_DIR = Path(THEROCK_DIR) / "build"
 
-ROCDECODE_TEST_PATH = str(Path(THEROCK_BIN_DIR).parent / "share" / "rocdecode" / "test")
+ROCDECODE_TEST_PATH = str(Path(THEROCK_BIN_DIR).resolve().parent / "share" / "rocdecode" / "test")
 if not os.path.isdir(ROCDECODE_TEST_PATH):
     logging.info(f"++ Error: rocdecode tests not found in {ROCDECODE_TEST_PATH}")
     sys.exit(1)
+else:
+    logging.info(f"++ INFO: rocdecode tests found in {ROCDECODE_TEST_PATH}")
 env = os.environ.copy()
 
 
