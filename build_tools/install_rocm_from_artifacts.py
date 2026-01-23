@@ -255,11 +255,15 @@ def retrieve_artifacts_by_run_id(args):
             extra_artifacts.append("rocdecode")
             argv.append("rocdecode_dev")
             argv.append("rocdecode_test")
+            argv.append("base_dev")
+            argv.append("amd-llvm_dev")
         if args.rocjpeg:
             extra_artifacts.append("sysdeps-amd-mesa")
             extra_artifacts.append("rocjpeg")
             argv.append("rocjpeg_dev")
             argv.append("rocjpeg_test")
+            argv.append("base_dev")
+            argv.append("amd-llvm_dev")
         if args.prim:
             extra_artifacts.append("prim")
         if args.rand:
