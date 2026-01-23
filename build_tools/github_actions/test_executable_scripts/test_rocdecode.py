@@ -68,6 +68,7 @@ def execute_tests(env):
 
     cmd = [
         "ctest",
+        "-VV",
         "--output-on-failure",
     ]
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")

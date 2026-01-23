@@ -58,6 +58,7 @@ def execute_tests(env):
 
     cmd = [
         "cmake",
+        "-VV",
         "-GNinja",
         ROCJPEG_TEST_PATH,
     ]
