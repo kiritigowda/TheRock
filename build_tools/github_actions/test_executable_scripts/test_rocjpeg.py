@@ -29,16 +29,14 @@ else:
 env = os.environ.copy()
 
 
+# set env variables required for tests
 def setup_env(env):
-    # catch/ctest framework
-    # Linux
-    #   LD_LIBRARY_PATH needs to be used
-    #   tests are hardcoded to look at THEROCK_BIN_DIR or /opt/rocm/lib path
     ROCM_PATH = Path(THEROCK_BIN_DIR).resolve().parent
     env["ROCM_PATH"] = str(ROCM_PATH)
+    logging.info(f"++ rocjpeg setting ROCM_PATH={ROCM_PATH}")
     if platform.system() == "Linux":
-        HIP_LIB_PATH = Path(THEROCK_BIN_DIR).parent / "lib"
-        logging.info(f"++ Setting LD_LIBRARY_PATH={HIP_LIB_PATH}")
+        HIP_LIB_PATH = Path(THEROCK_BIN_DIR).resolve().parent / "lib"
+        logging.info(f"++ rocjpeg setting LD_LIBRARY_PATH={HIP_LIB_PATH}")
         if "LD_LIBRARY_PATH" in env:
             env["LD_LIBRARY_PATH"] = f"{HIP_LIB_PATH}:{env['LD_LIBRARY_PATH']}"
         else:
@@ -60,6 +58,7 @@ def execute_tests(env):
 
     cmd = [
         "cmake",
+        "-GNinja",
         ROCJPEG_TEST_PATH,
     ]
     logging.info(f"++ Exec [{ROCJPEG_TEST_DIR}]$ {shlex.join(cmd)}")
