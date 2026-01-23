@@ -251,15 +251,15 @@ def retrieve_artifacts_by_run_id(args):
         if args.fusilli_plugin:
             extra_artifacts.append("fusilli-plugin")
         if args.rocdecode:
-            extra_artifacts.append("rocdecode_lib")
-            extra_artifacts.append("rocdecode_dev")
-            extra_artifacts.append("rocdecode_test")
-            extra_artifacts.append("sysdeps-amd-mesa_lib")
+            extra_artifacts.append("sysdeps-amd-mesa")
+            extra_artifacts.append("rocdecode")
+            argv.append("rocdecode_dev")
+            argv.append("rocdecode_test")
         if args.rocjpeg:
-            extra_artifacts.append("rocjpeg_lib")
-            extra_artifacts.append("rocjpeg_dev")
-            extra_artifacts.append("rocjpeg_test")
-            extra_artifacts.append("sysdeps-amd-mesa_lib")
+            extra_artifacts.append("sysdeps-amd-mesa")
+            extra_artifacts.append("rocjpeg")
+            argv.append("rocjpeg_dev")
+            argv.append("rocjpeg_test")
         if args.prim:
             extra_artifacts.append("prim")
         if args.rand:
