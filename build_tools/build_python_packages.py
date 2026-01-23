@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 """Given ROCm artifacts directories, performs surgery to re-layout them for
 distribution as Python packages and builds sdists and wheels as appropriate.
@@ -72,6 +73,18 @@ def run(args: argparse.Namespace):
             "rocwmma",
         ],
         tarball_compression=args.devel_tarball_compression,
+    )
+
+    # populate the media package
+    media = PopulatedDistPackage(params, logical_name="media")
+    media.populate_media_files(
+        addl_artifact_names=[
+            # Add all media lib, dev, and test packages
+            "sysdeps-amd-mesa",
+            "rocdecode",
+            "rocjpeg",
+        ],
+        tarball_compression=args.media_tarball_compression,
     )
 
     if args.build_packages:

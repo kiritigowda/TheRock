@@ -203,6 +203,13 @@ PackageEntry(
     template_directory="rocm-sdk-devel",
     required=False,
 )
+PackageEntry(
+    "media",
+    "rocm-media",
+    pure_py_package_name="rocm_media",
+    template_directory="rocm-media",
+    required=False,
+)
 
 # TODO(#703,#1057): Use patterns for version suffixes and platform differences too?
 
