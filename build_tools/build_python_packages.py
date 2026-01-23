@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """Given ROCm artifacts directories, performs surgery to re-layout them for
 distribution as Python packages and builds sdists and wheels as appropriate.
