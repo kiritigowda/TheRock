@@ -58,7 +58,6 @@ def execute_tests(env):
 
     cmd = [
         "cmake",
-        "-VV",
         "-GNinja",
         ROCJPEG_TEST_PATH,
     ]
@@ -67,6 +66,7 @@ def execute_tests(env):
 
     cmd = [
         "ctest",
+        "-VV",
         "--output-on-failure",
     ]
     logging.info(f"++ Exec [{ROCJPEG_TEST_DIR}]$ {shlex.join(cmd)}")

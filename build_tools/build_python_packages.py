@@ -76,7 +76,7 @@ def run(args: argparse.Namespace):
 
     # populate the media package
     media = PopulatedDistPackage(params, logical_name="media")
-    media.populate_media_files(
+    media.populate_devel_files(
         addl_artifact_names=[
             # Add all media lib, dev, and test packages
             "sysdeps-amd-mesa",
