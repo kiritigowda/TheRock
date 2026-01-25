@@ -83,7 +83,7 @@ def run(args: argparse.Namespace):
             "rocdecode",
             "rocjpeg",
         ],
-        tarball_compression=args.media_tarball_compression,
+        tarball_compression=args.devel_tarball_compression,
     )
 
     if args.build_packages:
