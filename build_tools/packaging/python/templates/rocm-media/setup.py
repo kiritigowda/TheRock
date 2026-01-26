@@ -1,4 +1,4 @@
-"""Main rocm-sdk-devel (OS specific)."""
+"""Main setup script for the rocm-media package (OS specific)."""
 
 import importlib.util
 import os
@@ -26,13 +26,13 @@ def import_dist_info():
 
 
 dist_info = import_dist_info()
-my_package = dist_info.ALL_PACKAGES["devel"]
+my_package = dist_info.ALL_PACKAGES["media"]
 print(f"Loaded dist_info package: {my_package}")
 packages = find_packages(where="./src")
 print("Found packages:", packages)
 
 setup(
-    name=f"rocm-sdk-devel",
+    name=f"rocm-media",
     version=dist_info.__version__,
     packages=packages,
     package_dir={

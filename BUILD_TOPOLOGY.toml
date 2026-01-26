@@ -178,10 +178,6 @@ artifact_groups = ["iree-libs"]
 description = "Profiler applications (depends on profiler-core)"
 artifact_groups = ["profiler-apps"]
 
-[build_stages.media]
-description = "Media Libraries"
-artifact_groups = ["media"]
-
 [build_stages.media-libs]
 description = "Media Libraries"
 artifact_groups = ["media-libs"]
@@ -294,19 +290,11 @@ type = "generic"
 artifact_group_deps = ["hip-runtime"]
 source_sets = ["iree-libs"]
 
-[artifact_groups.media]
+[artifact_groups.media-libs]
 description = "Media Libraries"
 type = "generic"
 artifact_group_deps = ["third-party-sysdeps", "base"]
-# TODO: rocm-systems included for projects/hip/VERSION (see CMakeLists.txt)
-# amd-mesa disabled on Windows via source_set
-source_sets = ["amd-mesa", "rocm-systems"]
-
-[artifact_groups.media-libs]
-description = "rocdecode and rocjpeg integration"
-type = "generic"
-artifact_group_deps = ["third-party-sysdeps"]
-source_sets = ["media-libs"]
+source_sets = ["amd-mesa", "media-libs"]
 
 # ==============================================================================
 # ARTIFACTS - The actual build outputs that can be transmitted between stages
@@ -323,7 +311,7 @@ artifact_deps = []  # No dependencies on other artifacts
 feature_group = "CORE"  # Part of core, enabled by default
 
 [artifacts.sysdeps-amd-mesa]
-artifact_group = "media"
+artifact_group = "media-libs"
 type = "target-neutral"
 artifact_deps = ["sysdeps"]
 feature_group = "MEDIA_LIBS" # Controlled by THEROCK_ENABLE_MEDIA_LIBS
@@ -543,14 +531,14 @@ disable_platforms = ["windows"]
 # --- Media Integration ---
 
 [artifacts.rocdecode]
-artifact_group = "media"
+artifact_group = "media-libs"
 type = "target-neutral"
 artifact_deps = ["core-runtime", "core-hip", "base", "sysdeps", "sysdeps-amd-mesa"]
 feature_group = "MEDIA_LIBS" # Controlled by THEROCK_ENABLE_MEDIA_LIBS
 disable_platforms = ["windows"]
 
 [artifacts.rocjpeg]
-artifact_group = "media"
+artifact_group = "media-libs"
 type = "target-neutral"
 artifact_deps = ["core-runtime", "core-hip", "base", "sysdeps", "sysdeps-amd-mesa"]
 feature_group = "MEDIA_LIBS" # Controlled by THEROCK_ENABLE_MEDIA_LIBS
