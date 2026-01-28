@@ -463,7 +463,7 @@ def main(argv):
         help="Include machine learning frameworks that are part of ROCM",
     )
     parser.add_argument(
-        "--include-rocm-media",
+        "--include-media-libs",
         default=True,
         action=argparse.BooleanOptionalAction,
         help="Include media projects that are part of ROCM",
@@ -509,7 +509,7 @@ def main(argv):
         default=[],
     )
     parser.add_argument(
-        "--rocm-media-projects",
+        "--media-libs-projects",
         nargs="+",
         type=str,
         default=(
