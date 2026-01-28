@@ -106,8 +106,8 @@ def get_enabled_projects(args) -> List[str]:
         projects.extend(["rocm-systems"])
     if args.include_ml_frameworks:
         projects.extend(args.ml_framework_projects)
-    if args.include_rocm_media:
-        projects.extend(args.rocm_media_projects)
+    if args.include_media_libs:
+        projects.extend(args.media_libs_projects)
     if args.include_iree_libs:
         projects.extend(args.iree_libs_projects)
     if args.include_math_libraries:
