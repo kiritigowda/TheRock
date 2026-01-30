@@ -23,6 +23,7 @@ python build_tools/install_rocm_from_artifacts.py
     [--debug-tools | --no-debug-tools]
     [--fft | --no-fft]
     [--hipdnn | --no-hipdnn]
+    [--hipdnn-samples | --no-hipdnn-samples]
     [--miopen | --no-miopen]
     [--miopen-plugin | --no-miopen-plugin]
     [--prim | --no-prim]
@@ -332,6 +333,7 @@ def retrieve_artifacts_by_run_id(args):
             args.debug_tools,
             args.fft,
             args.hipdnn,
+            args.hipdnn_samples,
             args.miopen,
             args.miopen_plugin,
             args.fusilli_plugin,
@@ -375,6 +377,8 @@ def retrieve_artifacts_by_run_id(args):
             extra_artifacts.append("fftw3")
         if args.hipdnn:
             extra_artifacts.append("hipdnn")
+        if args.hipdnn_samples:
+            extra_artifacts.append("hipdnn-samples")
         if args.miopen:
             extra_artifacts.append("miopen")
             # We need bin/MIOpenDriver executable for tests.
@@ -634,6 +638,13 @@ def main(argv):
         "--hipdnn",
         default=False,
         help="Include 'hipdnn' artifacts",
+        action=argparse.BooleanOptionalAction,
+    )
+
+    artifacts_group.add_argument(
+        "--hipdnn-samples",
+        default=False,
+        help="Include 'hipdnn-samples' artifacts",
         action=argparse.BooleanOptionalAction,
     )
 
