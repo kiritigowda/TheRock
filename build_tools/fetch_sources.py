@@ -518,8 +518,6 @@ def main(argv):
             else [
                 # Linux only projects.
                 "amd-mesa",
-                "rocdecode",
-                "rocjpeg",
             ]
         ),
     )
