@@ -288,7 +288,7 @@ test_matrix = {
     "rocdecode": {
         "job_name": "rocdecode",
         "fetch_artifact_args": "--rocdecode",
-        "timeout_minutes": 60,
+        "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocdecode.py')}",
         "platform": ["linux"],
         "total_shards": 1,
@@ -297,7 +297,7 @@ test_matrix = {
     "rocjpeg": {
         "job_name": "rocjpeg",
         "fetch_artifact_args": "--rocjpeg",
-        "timeout_minutes": 60,
+        "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocjpeg.py')}",
         "platform": ["linux"],
         "total_shards": 1,
