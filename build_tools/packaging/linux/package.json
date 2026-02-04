@@ -1957,12 +1957,12 @@
     "Architecture": "amd64",
     "BuildArch": "x86_64",
     "DEBDepends": [
-      "amdrocm-core-dev",
+      "amdrocm-runtime",
       "amdrocm-base",
       "amdrocm-sysdeps-amd-mesa"
     ],
     "RPMRequires": [
-      "amdrocm-core-devel",
+      "amdrocm-runtime",
       "amdrocm-base",
       "amdrocm-sysdeps-amd-mesa"
     ],
@@ -2001,12 +2001,12 @@
     "Architecture": "amd64",
     "BuildArch": "x86_64",
     "DEBDepends": [
-      "amdrocm-core-dev",
+      "amdrocm-runtime",
       "amdrocm-base",
       "amdrocm-sysdeps-amd-mesa"
     ],
     "RPMRequires": [
-      "amdrocm-core-devel",
+      "amdrocm-runtime",
       "amdrocm-base",
       "amdrocm-sysdeps-amd-mesa"
     ],
