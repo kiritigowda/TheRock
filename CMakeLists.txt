@@ -149,6 +149,8 @@ cmake_path(ABSOLUTE_PATH THEROCK_ROCM_SYSTEMS_SOURCE_DIR NORMALIZE)
 
 # Allow to specify alternative source locations instead of using
 # repositories tracked in TheRock's `.gitmodules`.
+therock_enable_external_source("rccl" "${THEROCK_SOURCE_DIR}/comm-libs/rccl" OFF)
+therock_enable_external_source("rccl-tests" "${THEROCK_SOURCE_DIR}/comm-libs/rccl-tests" OFF)
 therock_enable_external_source("composable-kernel" "${THEROCK_SOURCE_DIR}/ml-libs/composable_kernel" OFF)
 
 # Overall build settings.
@@ -283,26 +285,6 @@ if(THEROCK_FLAG_INCLUDE_PROFILER)
   )
 endif()
 
-# Optional sub-features that control behavior within artifacts
-
-# Math library sub-components (control what gets built within BLAS artifact)
-therock_add_feature(SPARSE
-  GROUP MATH_LIBS
-  DESCRIPTION "Enables sparse libraries (hipsparse, hipsparselt, rocsparse) within BLAS"
-  REQUIRES BLAS PRIM
-)
-
-if(NOT WIN32)
-  set(_solver_platform_requirements "HOST_SUITE_SPARSE")
-else()
-  set(_solver_platform_requirements "")
-endif()
-therock_add_feature(SOLVER
-  GROUP MATH_LIBS
-  DESCRIPTION "Enables solver libraries (hipsolver, rocsolver) within BLAS"
-  REQUIRES BLAS PRIM SPARSE ${_solver_platform_requirements}
-)
-
 # Finalize all feature flags.
 therock_finalize_features()
 therock_report_features()
@@ -365,6 +347,7 @@ set(THEROCK_BUNDLED_BZIP2)
 set(THEROCK_BUNDLED_ELFUTILS)
 set(THEROCK_BUNDLED_EXPAT)
 set(THEROCK_BUNDLED_GMP)
+set(THEROCK_BUNDLED_HWLOC)
 set(THEROCK_BUNDLED_LIBBACKTRACE)
 set(THEROCK_BUNDLED_LIBCAP)
 set(THEROCK_BUNDLED_LIBDRM)
@@ -393,6 +376,7 @@ if(THEROCK_BUNDLE_SYSDEPS)
     set(THEROCK_BUNDLED_ELFUTILS therock-elfutils)
     set(THEROCK_BUNDLED_EXPAT therock-expat)
     set(THEROCK_BUNDLED_GMP therock-gmp)
+    set(THEROCK_BUNDLED_HWLOC therock-hwloc)
     set(THEROCK_BUNDLED_LIBBACKTRACE therock-libbacktrace)
     set(THEROCK_BUNDLED_LIBCAP therock-libcap)
     set(THEROCK_BUNDLED_LIBDRM therock-libdrm)
@@ -403,9 +387,34 @@ if(THEROCK_BUNDLE_SYSDEPS)
     set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
     set(THEROCK_BUNDLED_ZLIB therock-zlib)
     set(THEROCK_BUNDLED_ZSTD therock-zstd)
+<<<<<<< kg/media-libs-for-therock
     if(THEROCK_ENABLE_SYSDEPS_AMD_MESA)
       set(THEROCK_BUNDLED_AMDMESA therock-amd-mesa)
     endif()
+=======
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # macOS uses install_name_tool (from Xcode) instead of patchelf
+    find_program(INSTALL_NAME_TOOL install_name_tool)
+    if(NOT INSTALL_NAME_TOOL)
+      message(FATAL_ERROR "Building with THEROCK_BUNDLE_SYSDEPS=ON on macOS requires `install_name_tool` (install Xcode Command Line Tools)")
+    endif()
+    find_program(MESON_BUILD meson)
+    if(NOT MESON_BUILD)
+      message(FATAL_ERROR "Building with THEROCK_BUNDLE_SYSDEPS=ON on macOS requires `meson` (easiest: `pip install meson`)")
+    endif()
+    # macOS bundled deps - note: libcap, libdrm, numactl are Linux-specific
+    set(THEROCK_BUNDLED_BZIP2 therock-bzip2)
+    set(THEROCK_BUNDLED_ELFUTILS therock-elfutils)
+    set(THEROCK_BUNDLED_EXPAT, therock-expat)
+    set(THEROCK_BUNDLED_GMP, therock-gmp)
+    set(THEROCK_BUNDLED_LIBBACKTRACE therock-libbacktrace)
+    set(THEROCK_BUNDLED_LIBLZMA therock-liblzma)
+    set(THEROCK_BUNDLED_MPFR, therock-mpfr)
+    set(THEROCK_BUNDLED_NCURSES, therock-ncurses)
+    set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
+    set(THEROCK_BUNDLED_ZLIB therock-zlib)
+    set(THEROCK_BUNDLED_ZSTD therock-zstd)
+>>>>>>> main
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(THEROCK_BUNDLED_BZIP2 therock-bzip2)
     set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
