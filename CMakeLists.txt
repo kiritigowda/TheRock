@@ -387,11 +387,9 @@ if(THEROCK_BUNDLE_SYSDEPS)
     set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
     set(THEROCK_BUNDLED_ZLIB therock-zlib)
     set(THEROCK_BUNDLED_ZSTD therock-zstd)
-<<<<<<< kg/media-libs-for-therock
     if(THEROCK_ENABLE_SYSDEPS_AMD_MESA)
       set(THEROCK_BUNDLED_AMDMESA therock-amd-mesa)
     endif()
-=======
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     # macOS uses install_name_tool (from Xcode) instead of patchelf
     find_program(INSTALL_NAME_TOOL install_name_tool)
@@ -414,7 +412,6 @@ if(THEROCK_BUNDLE_SYSDEPS)
     set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
     set(THEROCK_BUNDLED_ZLIB therock-zlib)
     set(THEROCK_BUNDLED_ZSTD therock-zstd)
->>>>>>> main
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(THEROCK_BUNDLED_BZIP2 therock-bzip2)
     set(THEROCK_BUNDLED_SQLITE3 therock-sqlite3)
