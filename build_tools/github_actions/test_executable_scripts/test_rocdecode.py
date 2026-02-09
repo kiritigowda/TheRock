@@ -48,6 +48,10 @@ def setup_env(env):
 
 def execute_tests(env):
     ROCDECODE_TEST_DIR = Path(THEROCK_TEST_DIR) / "rocdecode-test"
+    ROCM_LIB_PATH = Path(THEROCK_BIN_DIR).resolve().parent / "lib"
+    ROCDECODE_LIB = ROCM_LIB_PATH / "librocdecode.so"
+    ROCM_SYSDEPS_PATH = ROCM_LIB_PATH / "rocm_sysdeps" / "lib"
+    RADEON_SI_LIB = ROCM_SYSDEPS_PATH / "radeonsi_drv_video.so"
 
     cmd = [
         "mkdir",
@@ -71,6 +75,31 @@ def execute_tests(env):
         "-VV",
         "--output-on-failure",
     ]
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ldd",
+        str(ROCDECODE_LIB),
+    ]
+
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ldd",
+        str(RADEON_SI_LIB),
+    ]
+
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ls",
+        "-xl",
+        str(ROCM_SYSDEPS_PATH),
+    ]
+
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
 
