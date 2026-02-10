@@ -62,27 +62,9 @@ def execute_tests(env):
     subprocess.run(cmd, cwd=THEROCK_TEST_DIR, check=True, env=env)
 
     cmd = [
-        "cmake",
-        "-GNinja",
-        ROCDECODE_TEST_PATH,
-    ]
-
-    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
-    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
-
-    cmd = [
-        "ctest",
-        "-VV",
-        "--output-on-failure",
-    ]
-    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
-    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
-
-    cmd = [
         "ldd",
         str(ROCDECODE_LIB),
     ]
-
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
 
@@ -90,7 +72,6 @@ def execute_tests(env):
         "ldd",
         str(RADEON_SI_LIB),
     ]
-
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
 
@@ -99,7 +80,22 @@ def execute_tests(env):
         "-xl",
         str(ROCM_SYSDEPS_PATH),
     ]
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
 
+    cmd = [
+        "cmake",
+        "-GNinja",
+        ROCDECODE_TEST_PATH,
+    ]
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ctest",
+        "-VV",
+        "--output-on-failure",
+    ]
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
 
