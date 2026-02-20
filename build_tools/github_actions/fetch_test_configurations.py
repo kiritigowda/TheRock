@@ -270,7 +270,7 @@ test_matrix = {
     # enabled by default.
     # "fusilli_plugin": {
     #     "job_name": "fusilli_plugin",
-    #     "fetch_artifact_args": "--hipdnn --fusilli-plugin --tests",
+    #     "fetch_artifact_args": "--hipdnn --fusilli-plugin --iree-compiler --tests",
     #     "timeout_minutes": 15,
     #     "test_script": f"python {_get_script_path('test_fusilli_plugin.py')}",
     #     "platform": ["linux"],
