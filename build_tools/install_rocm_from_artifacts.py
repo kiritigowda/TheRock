@@ -33,6 +33,7 @@ python build_tools/install_rocm_from_artifacts.py
     [--rocjpeg | --no-rocjpeg]
     [--rocprofiler-compute | --no-rocprofiler-compute]
     [--rocprofiler-systems | --no-rocprofiler-systems]
+    [--rocrtst | --no-rocrtst]
     [--rocwmma | --no-rocwmma]
     [--libhipcxx | --no-libhipcxx]
     [--tests | --no-tests]
@@ -352,6 +353,7 @@ def retrieve_artifacts_by_run_id(args):
             args.rocjpeg,
             args.rocprofiler_compute,
             args.rocprofiler_systems,
+            args.rocrtst,
             args.rocwmma,
             args.libhipcxx,
         ]
@@ -431,6 +433,11 @@ def retrieve_artifacts_by_run_id(args):
             extra_artifacts.append("rocprofiler-systems")
             # Contains executables (rocprof-sys-run, rocprof-sys-instrument, etc.)
             argv.append("rocprofiler-systems_run")
+        if args.rocrtst:
+            extra_artifacts.append("rocrtst")
+            # rocrtst depends on sysdeps-hwloc (which depends on sysdeps-libpciaccess)
+            extra_artifacts.append("sysdeps-hwloc")
+            extra_artifacts.append("sysdeps-libpciaccess")
         if args.rocwmma:
             extra_artifacts.append("rocwmma")
         if args.libhipcxx:
@@ -754,6 +761,13 @@ def main(argv):
         "--rocprofiler-sdk",
         default=False,
         help="Include 'rocprofiler-sdk' artifacts",
+        action=argparse.BooleanOptionalAction,
+    )
+
+    artifacts_group.add_argument(
+        "--rocrtst",
+        default=False,
+        help="Include 'rocrtst' artifacts",
         action=argparse.BooleanOptionalAction,
     )
 
