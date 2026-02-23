@@ -1,4 +1,4 @@
-if(THEROCK_ENABLE_ROCDECODE)
+if(THEROCK_ENABLE_ROCDECODE AND THEROCK_ENABLE_SYSDEPS_AMD_MESA)
   ##############################################################################
   # rocdecode library
   ##############################################################################
@@ -20,7 +20,7 @@ if(THEROCK_ENABLE_ROCDECODE)
       hip-clr
     BUILD_DEPS
     CMAKE_ARGS
-      -DROCM_PATH=${CMAKE_BINARY_DIR}/dist/rocm
+      -DROCM_PATH=
     INTERFACE_LINK_DIRS
       "lib"
     INSTALL_RPATH_DIRS
@@ -53,9 +53,9 @@ if(THEROCK_ENABLE_ROCDECODE)
       ${THEROCK_BUNDLED_AMDMESA}
       rocdecode
   )
-endif(THEROCK_ENABLE_ROCDECODE)
+endif(THEROCK_ENABLE_ROCDECODE AND THEROCK_ENABLE_SYSDEPS_AMD_MESA)
 
-if(THEROCK_ENABLE_ROCJPEG)
+if(THEROCK_ENABLE_ROCJPEG AND THEROCK_ENABLE_SYSDEPS_AMD_MESA)
   ##############################################################################
   # rocjpeg library
   ##############################################################################
@@ -77,7 +77,7 @@ if(THEROCK_ENABLE_ROCJPEG)
       hip-clr
     BUILD_DEPS
     CMAKE_ARGS
-      -DROCM_PATH=${CMAKE_BINARY_DIR}/dist/rocm
+      -DROCM_PATH=
     INTERFACE_LINK_DIRS
       "lib"
     INSTALL_RPATH_DIRS
@@ -109,4 +109,4 @@ if(THEROCK_ENABLE_ROCJPEG)
       ${THEROCK_BUNDLED_AMDMESA}
       rocjpeg
   )
-endif(THEROCK_ENABLE_ROCJPEG)
+endif(THEROCK_ENABLE_ROCJPEG AND THEROCK_ENABLE_SYSDEPS_AMD_MESA)

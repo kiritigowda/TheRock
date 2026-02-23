@@ -94,6 +94,7 @@ def core_artifact_filter(an: ArtifactName) -> bool:
     core = an.name in [
         "amd-llvm",
         "base",
+        "core-amdsmi",
         "core-hip",
         "core-ocl",
         "core-hipinfo",
