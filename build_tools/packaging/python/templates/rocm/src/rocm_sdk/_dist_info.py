@@ -208,6 +208,10 @@ PackageEntry(
     "rocm-media",
     pure_py_package_name="rocm_media",
     template_directory="rocm-media",
+    "profilers",
+    "rocm-sdk-profilers",
+    pure_py_package_name="rocm_sdk_profilers",
+    template_directory="rocm-sdk-profilers",
     required=False,
 )
 
@@ -245,8 +249,6 @@ LibraryEntry("hipsparselt", "libraries", "libhipsparselt.so*", "")
 LibraryEntry("hipsolver", "libraries", "libhipsolver.so*", "hipsolver*.dll")
 LibraryEntry("rccl", "libraries", "librccl.so*", "")
 LibraryEntry("miopen", "libraries", "libMIOpen.so*", "MIOpen*.dll")
-LibraryEntry("origami", "libraries", "liborigami.so*", "origami*.dll")
-
 
 # Others we may want:
 # hiprtc-builtins
