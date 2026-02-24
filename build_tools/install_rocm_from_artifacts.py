@@ -17,8 +17,6 @@ python build_tools/install_rocm_from_artifacts.py
     [--dry-run]
     [--run-github-repo RUN_GITHUB_REPO]
     [--aqlprofile | --no-aqlprofile]
-    [--rocdecode | --no-rocdecode]
-    [--rocjpeg | --no-rocjpeg]
     [--blas | --no-blas]
     [--debug-tools | --no-debug-tools]
     [--fft | --no-fft]
@@ -358,8 +356,6 @@ def retrieve_artifacts_by_run_id(args):
             args.rocrtst,
             args.rocwmma,
             args.libhipcxx,
-            args.rocdecode,
-            args.rocjpeg,
         ]
     ):
         argv.extend(base_artifact_patterns)
