@@ -314,7 +314,7 @@ test_matrix = {
     # rocdecode
     "rocdecode": {
         "job_name": "rocdecode",
-        "fetch_artifact_args": "--rocdecode",
+        "fetch_artifact_args": "--rocdecode --tests",
         "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocdecode.py')}",
         "platform": ["linux"],
@@ -323,7 +323,7 @@ test_matrix = {
     # rocjpeg
     "rocjpeg": {
         "job_name": "rocjpeg",
-        "fetch_artifact_args": "--rocjpeg",
+        "fetch_artifact_args": "--rocjpeg --tests",
         "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocjpeg.py')}",
         "platform": ["linux"],
