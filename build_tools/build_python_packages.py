@@ -70,16 +70,11 @@ def run(args: argparse.Namespace):
             # included in runtime packages, but we still want them in the devel package.
             "prim",
             "rocwmma",
+            # Third party dependencies needed by hipDNN consumers.
+            "flatbuffers",
+            "nlohmann-json",
         ],
         tarball_compression=args.devel_tarball_compression,
-    )
-
-    # populate the media package
-    media = PopulatedDistPackage(params, logical_name="media")
-    media.populate_runtime_files(
-        params.filter_artifacts(
-            filter=functools.partial(media_artifact_filter),
-        )
     )
 
     if args.build_packages:
@@ -122,7 +117,10 @@ def libraries_artifact_filter(target_family: str, an: ArtifactName) -> bool:
         in [
             "blas",
             "fft",
+            "hipdnn",
             "miopen",
+            "miopen-plugin",
+            "hipblaslt-plugin",
             "rand",
             "rccl",
         ]
@@ -130,18 +128,9 @@ def libraries_artifact_filter(target_family: str, an: ArtifactName) -> bool:
         in [
             "lib",
         ]
-        and an.target_family == target_family
+        and (an.target_family == target_family or an.target_family == "generic")
     )
     return libraries
-
-
-def media_artifact_filter(an: ArtifactName) -> bool:
-    media = an.name in [
-        "rocdecode",
-        "rocjpeg",
-        "sysdeps-amd-mesa",
-    ]
-    return media
 
 
 def main(argv: list[str]):
