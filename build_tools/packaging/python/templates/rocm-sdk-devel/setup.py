@@ -40,6 +40,12 @@ setup(
     },
     zip_safe=False,
     include_package_data=True,
+    # include_package_data=True only picks up version-controlled files.
+    # The devel tarball is generated at build time, so it must be
+    # explicitly listed here to be included in the wheel.
+    package_data={
+        "rocm_sdk_devel": ["*.tar", "*.tar.xz"],
+    },
     options={
         "bdist_wheel": {
             "plat_name": os.getenv(
@@ -47,7 +53,13 @@ setup(
             ),
         },
     },
+    # Wheels don't support post-install hooks, so we provide an explicit
+    # command to extract the devel tarball into site-packages. Users must
+    # run `rocm-sdk-devel-init` once after install to make headers, CMake
+    # files, and dev libraries available for C++ compilation.
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "rocm-sdk-devel-init=rocm_sdk_devel._cli:init",
+        ],
     },
 )
