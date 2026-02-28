@@ -428,7 +428,9 @@ test_matrix = {
         "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocdecode.py')}",
         "platform": ["linux"],
-        "total_shards": 1,
+        "total_shards_dict": {
+            "linux": 1,
+        },
     },
     # rocjpeg
     "rocjpeg": {
@@ -437,7 +439,9 @@ test_matrix = {
         "timeout_minutes": 10,
         "test_script": f"python {_get_script_path('test_rocjpeg.py')}",
         "platform": ["linux"],
-        "total_shards": 1,
+        "total_shards_dict": {
+            "linux": 1,
+        },
     },
     # aqlprofile tests
     "aqlprofile": {

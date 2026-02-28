@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -43,7 +44,7 @@ def setup_env(env):
             env["LD_LIBRARY_PATH"] = str(HIP_LIB_PATH)
     else:
         logging.info(f"++ rocdecode tests only supported on Linux")
-        exit()
+        sys.exit(0)
 
 
 def execute_tests(env):
@@ -53,14 +54,9 @@ def execute_tests(env):
     ROCM_SYSDEPS_PATH = ROCM_LIB_PATH / "rocm_sysdeps" / "lib"
     RADEON_SI_LIB = ROCM_SYSDEPS_PATH / "radeonsi_drv_video.so"
 
-    cmd = [
-        "mkdir",
-        "-p",
-        "rocdecode-test",
-    ]
-    logging.info(f"++ Exec [{THEROCK_TEST_DIR}]$ {shlex.join(cmd)}")
-    subprocess.run(cmd, cwd=THEROCK_TEST_DIR, check=True, env=env)
+    ROCDECODE_TEST_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Diagnostic: verify shared library dependencies are resolvable
     cmd = [
         "ldd",
         str(ROCDECODE_LIB),
@@ -90,6 +86,28 @@ def execute_tests(env):
     ]
     logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCDECODE_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ctest",
+        "-N",
+    ]
+    logging.info(f"++ Exec [{ROCDECODE_TEST_DIR}]$ {shlex.join(cmd)}")
+    ctest_list = subprocess.run(
+        cmd,
+        cwd=ROCDECODE_TEST_DIR,
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    logging.info(ctest_list.stdout)
+    match = re.search(r"Total Tests:\s*(\d+)", ctest_list.stdout)
+    if match is None:
+        raise RuntimeError(
+            "Failed to determine CTest test count from `ctest -N` output"
+        )
+    if int(match.group(1)) == 0:
+        raise RuntimeError("CTest discovered zero rocdecode tests")
 
     cmd = [
         "ctest",

@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -43,18 +44,12 @@ def setup_env(env):
             env["LD_LIBRARY_PATH"] = str(HIP_LIB_PATH)
     else:
         logging.info(f"++ rocjpeg tests only supported on Linux")
-        exit()
+        sys.exit(0)
 
 
 def execute_tests(env):
     ROCJPEG_TEST_DIR = Path(THEROCK_TEST_DIR) / "rocjpeg-test"
-    cmd = [
-        "mkdir",
-        "-p",
-        "rocjpeg-test",
-    ]
-    logging.info(f"++ Exec [{THEROCK_TEST_DIR}]$ {shlex.join(cmd)}")
-    subprocess.run(cmd, cwd=THEROCK_TEST_DIR, check=True, env=env)
+    ROCJPEG_TEST_DIR.mkdir(parents=True, exist_ok=True)
 
     cmd = [
         "cmake",
@@ -63,6 +58,28 @@ def execute_tests(env):
     ]
     logging.info(f"++ Exec [{ROCJPEG_TEST_DIR}]$ {shlex.join(cmd)}")
     subprocess.run(cmd, cwd=ROCJPEG_TEST_DIR, check=True, env=env)
+
+    cmd = [
+        "ctest",
+        "-N",
+    ]
+    logging.info(f"++ Exec [{ROCJPEG_TEST_DIR}]$ {shlex.join(cmd)}")
+    ctest_list = subprocess.run(
+        cmd,
+        cwd=ROCJPEG_TEST_DIR,
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    logging.info(ctest_list.stdout)
+    match = re.search(r"Total Tests:\s*(\d+)", ctest_list.stdout)
+    if match is None:
+        raise RuntimeError(
+            "Failed to determine CTest test count from `ctest -N` output"
+        )
+    if int(match.group(1)) == 0:
+        raise RuntimeError("CTest discovered zero rocjpeg tests")
 
     cmd = [
         "ctest",
