@@ -44,9 +44,7 @@ class ROCmMediaTest(unittest.TestCase):
         for lib_name in MEDIA_LIBRARIES:
             for so_path in _find_media_so_files(lib_name):
                 if so_path.suffix == ".so" or ".so." in so_path.name:
-                    with self.subTest(
-                        msg=f"Check {lib_name} loads", so_path=so_path
-                    ):
+                    with self.subTest(msg=f"Check {lib_name} loads", so_path=so_path):
                         command = "import ctypes; import sys; ctypes.CDLL(sys.argv[1])"
                         subprocess.check_call(
                             [sys.executable, "-c", command, str(so_path)]
