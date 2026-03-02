@@ -81,6 +81,16 @@ jobs:
             --dest-dir="${{ env.PACKAGES_DIR }}" \
             --version="${{ inputs.package_version }}"
 
+      - name: Test media Python package contents
+        run: |
+          python -m venv .venv-test
+          source .venv-test/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install --no-index --find-links="${{ env.PACKAGES_DIR }}/dist" \
+            "${{ env.PACKAGES_DIR }}"/dist/rocm-sdk-core-*.whl \
+            "${{ env.PACKAGES_DIR }}"/dist/rocm-*.tar.gz
+          python -m unittest -v rocm_sdk.tests.media_test
+
       - name: Configure AWS Credentials for non-forked repos
         if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
