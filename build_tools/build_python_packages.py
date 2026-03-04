@@ -138,6 +138,7 @@ def run(args: argparse.Namespace):
 
 def core_artifact_filter(an: ArtifactName) -> bool:
     core = an.name in [
+        "amd-dbgapi",
         "amd-llvm",
         "aqlprofile",
         "base",
@@ -150,10 +151,16 @@ def core_artifact_filter(an: ArtifactName) -> bool:
         "host-blas",
         "host-suite-sparse",
         "rocdecode",
+        "rocgdb",
         "rocjpeg",
         "rocprofiler-sdk",
+        "rocr-debug-agent",
         "sysdeps",
         "sysdeps-amd-mesa",
+        "sysdeps-expat",
+        "sysdeps-gmp",
+        "sysdeps-mpfr",
+        "sysdeps-ncurses",
     ] and an.component in [
         "lib",
         "run",
