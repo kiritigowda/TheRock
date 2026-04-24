@@ -211,6 +211,16 @@ def detect_changed_artifacts_from_files(
         for artifact in topology.get_artifacts_in_group(group_name):
             affected_artifacts.add(artifact.name)
 
+    if len(affected_groups) > 5:
+        logger.warning(
+            "Detected %d affected artifact groups: %s. "
+            "This is likely due to a broad submodule (e.g., rocm-systems) that "
+            "appears in many artifact groups. Downstream testing may cover "
+            "nearly all components, similar to full CI.",
+            len(affected_groups),
+            sorted(affected_groups),
+        )
+
     return sorted(affected_artifacts)
 
 

@@ -95,21 +95,52 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "artifact_run_id=${{ inputs.artifact_run_id }}" >> "$GITHUB_OUTPUT"
           else
-            # Find the latest successful multi_arch_ci run on main
-            RUN_ID=$(gh run list \
-              --repo "${{ github.repository }}" \
-              --workflow multi_arch_ci.yml \
-              --branch main \
-              --status success \
-              --limit 1 \
-              --json databaseId \
-              --jq '.[0].databaseId')
-            if [[ -z "$RUN_ID" ]]; then
-              echo "::error::No successful multi_arch_ci run found on main"
-              exit 1
-            fi
-            echo "artifact_run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-            echo "Resolved artifact run ID: $RUN_ID"
+            # Wait for a successful multi_arch_ci run matching the PR's HEAD commit
+            PR_BRANCH="${{ github.event.pull_request.head.ref }}"
+            PR_HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            TIMEOUT=14400  # 4 hours
+            INTERVAL=120   # check every 2 minutes
+            ELAPSED=0
+
+            echo "Looking for multi_arch_ci run on branch '$PR_BRANCH' at commit ${PR_HEAD_SHA:0:8}"
+
+            while true; do
+              # Get recent runs on the PR branch and find one matching the HEAD SHA
+              RUN_INFO=$(gh run list \
+                --repo "${{ github.repository }}" \
+                --workflow multi_arch_ci.yml \
+                --branch "$PR_BRANCH" \
+                --limit 5 \
+                --json databaseId,status,conclusion,headSha \
+                --jq "[.[] | select(.headSha == \"$PR_HEAD_SHA\")] | .[0] // empty")
+
+              if [[ -n "$RUN_INFO" && "$RUN_INFO" != "null" ]]; then
+                RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
+                RUN_STATUS=$(echo "$RUN_INFO" | jq -r '.status')
+                RUN_CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion // empty')
+
+                if [[ "$RUN_STATUS" == "completed" && "$RUN_CONCLUSION" == "success" ]]; then
+                  echo "artifact_run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+                  echo "Resolved artifact run ID: $RUN_ID (branch: $PR_BRANCH, commit: ${PR_HEAD_SHA:0:8})"
+                  break
+                elif [[ "$RUN_STATUS" == "completed" ]]; then
+                  echo "::error::multi_arch_ci run $RUN_ID completed with conclusion '$RUN_CONCLUSION'. Fix the build before running downstream tests."
+                  exit 1
+                fi
+
+                echo "Waiting for multi_arch_ci run $RUN_ID (status: $RUN_STATUS, elapsed: ${ELAPSED}s)..."
+              else
+                echo "No multi_arch_ci run found for commit ${PR_HEAD_SHA:0:8} yet (elapsed: ${ELAPSED}s)..."
+              fi
+
+              if [[ "$ELAPSED" -ge "$TIMEOUT" ]]; then
+                echo "::error::Timed out waiting for multi_arch_ci to complete on branch '$PR_BRANCH' at commit ${PR_HEAD_SHA:0:8}."
+                exit 1
+              fi
+
+              sleep "$INTERVAL"
+              ELAPSED=$((ELAPSED + INTERVAL))
+            done
           fi
 
       - name: Configure downstream tests
