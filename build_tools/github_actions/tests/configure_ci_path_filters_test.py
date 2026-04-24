@@ -9,7 +9,65 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.fspath(Path(__file__).parent.parent))
 
-from configure_ci_path_filters import is_ci_run_required
+from configure_ci_path_filters import is_ci_run_required, is_test_only_change
+
+
+class TestIsTestOnlyChange(unittest.TestCase):
+    def test_test_script_only(self):
+        paths = ["build_tools/github_actions/test_executable_scripts/test_rocprim.py"]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_test_config_only(self):
+        paths = ["build_tools/github_actions/fetch_test_configurations.py"]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_test_harness_only(self):
+        paths = ["build_tools/github_actions/therock_test_harness.py"]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_test_workflow_only(self):
+        paths = [".github/workflows/test_artifacts.yml"]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_multiple_test_files(self):
+        paths = [
+            "build_tools/github_actions/test_executable_scripts/test_rocblas.py",
+            "build_tools/github_actions/fetch_test_configurations.py",
+            ".github/workflows/test_component.yml",
+        ]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_test_files_with_skippable_files(self):
+        paths = [
+            "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            "docs/README.md",
+        ]
+        self.assertTrue(is_test_only_change(paths))
+
+    def test_source_file_is_not_test_only(self):
+        paths = ["CMakeLists.txt"]
+        self.assertFalse(is_test_only_change(paths))
+
+    def test_mixed_test_and_source_is_not_test_only(self):
+        paths = [
+            "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            "CMakeLists.txt",
+        ]
+        self.assertFalse(is_test_only_change(paths))
+
+    def test_ci_workflow_is_not_test_only(self):
+        paths = [".github/workflows/ci.yml"]
+        self.assertFalse(is_test_only_change(paths))
+
+    def test_only_skippable_files_is_not_test_only(self):
+        paths = ["README.md", "docs/guide.md"]
+        self.assertFalse(is_test_only_change(paths))
+
+    def test_none_paths_is_not_test_only(self):
+        self.assertFalse(is_test_only_change(None))
+
+    def test_empty_paths_is_not_test_only(self):
+        self.assertFalse(is_test_only_change([]))
 
 
 class ConfigureCIPathFiltersTest(unittest.TestCase):

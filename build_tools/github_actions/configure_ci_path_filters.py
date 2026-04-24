@@ -91,6 +91,29 @@ def get_git_submodule_paths(repo_root: Optional[str] = None) -> Optional[Iterabl
         return []
 
 
+def is_test_only_change(paths: Optional[Iterable[str]]) -> bool:
+    """Checks if all CI-relevant changes are test-only (no build needed).
+
+    Returns True when every non-skippable path matches a test-only pattern.
+    When True, the build can be skipped and tests run against prebuilt
+    artifacts from the latest successful main branch CI run.
+
+    Args:
+        paths: Iterable of file paths to evaluate, or None if unavailable
+
+    Returns:
+        True if all CI-relevant changes are test-only, False otherwise
+    """
+    if paths is None:
+        return False
+
+    ci_relevant = [p for p in paths if not _is_path_skippable(p)]
+    if not ci_relevant:
+        return False
+
+    return all(_is_path_test_only(p) for p in ci_relevant)
+
+
 def is_ci_run_required(paths: Optional[Iterable[str]]) -> bool:
     """Checks if a CI run is required based on modified file paths.
 
@@ -162,6 +185,18 @@ _SKIPPABLE_PATH_PATTERNS = [
     "experimental/*",
 ]
 
+# File path patterns for test-only changes. When ALL non-skippable changed
+# files match these patterns, the build can be skipped and tests run against
+# prebuilt artifacts from the latest successful main branch CI run.
+_TEST_ONLY_PATH_PATTERNS = [
+    "build_tools/github_actions/test_executable_scripts/*",
+    "build_tools/github_actions/fetch_test_configurations.py",
+    "build_tools/github_actions/therock_test_harness.py",
+    ".github/workflows/test_component.yml",
+    ".github/workflows/test_artifacts.yml",
+    ".github/workflows/therock_test_harness.yml",
+]
+
 # GitHub workflow file patterns that are considered CI-related.
 # Changes to workflow files matching these patterns will trigger CI runs,
 # as they may affect the CI pipeline itself.
@@ -187,6 +222,11 @@ _GITHUB_WORKFLOWS_CI_PATTERNS = [
 def _is_path_skippable(path: str) -> bool:
     """Checks if a single file path matches any skippable pattern."""
     return any(fnmatch.fnmatch(path, pattern) for pattern in _SKIPPABLE_PATH_PATTERNS)
+
+
+def _is_path_test_only(path: str) -> bool:
+    """Checks if a single file path matches any test-only pattern."""
+    return any(fnmatch.fnmatch(path, pattern) for pattern in _TEST_ONLY_PATH_PATTERNS)
 
 
 def _check_for_non_skippable_path(paths: Optional[Iterable[str]]) -> bool:

@@ -16,7 +16,7 @@ import tempfile
 import unittest
 from dataclasses import fields
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.fspath(Path(__file__).parent.parent))
 import configure_multi_arch_ci as cm
@@ -353,6 +353,42 @@ class TestDecideJobs(unittest.TestCase):
         )
         self.assertEqual(decision.rebuild_stages, ["math-libs"])
 
+    def test_test_only_change_marks_all_stages_prebuilt(self):
+        """Test-only change → all build stages marked PREBUILT."""
+        git = cm.GitContext(
+            changed_files=[
+                "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            ],
+            test_only=True,
+        )
+        result = cm.decide_jobs(self._inputs(), git_context=git)
+        self.assertEqual(
+            sorted(result.build_rocm.prebuilt_stages),
+            sorted(cm._ALL_BUILD_STAGE_NAMES),
+        )
+        self.assertEqual(result.build_rocm.rebuild_stages, [])
+
+    def test_test_only_does_not_override_explicit_prebuilt(self):
+        """Explicit prebuilt_stages from workflow_dispatch takes precedence."""
+        git = cm.GitContext(test_only=True)
+        result = cm.decide_jobs(
+            self._inputs(
+                event_name="workflow_dispatch",
+                prebuilt_stages="foundation",
+            ),
+            git_context=git,
+        )
+        self.assertEqual(result.build_rocm.prebuilt_stages, ["foundation"])
+
+    def test_test_only_false_does_not_affect_stages(self):
+        """Non-test-only change with no explicit prebuilt → no prebuilt stages."""
+        git = cm.GitContext(
+            changed_files=["CMakeLists.txt"],
+            test_only=False,
+        )
+        result = cm.decide_jobs(self._inputs(), git_context=git)
+        self.assertEqual(result.build_rocm.prebuilt_stages, [])
+
 
 # ---------------------------------------------------------------------------
 # Step 4: Select Targets
@@ -552,6 +588,44 @@ class TestSelectTargets(unittest.TestCase):
         # gfx94x is linux-only (no windows entry in presubmit matrix)
         self.assertIn("gfx94x", result.linux_families)
         self.assertNotIn("gfx94x", result.windows_families)
+
+
+class TestBaselineCompatibility(unittest.TestCase):
+    """Test compatibility of selected targets with normal main baselines."""
+
+    def test_pull_request_defaults_are_supported_by_main_baseline(self):
+        inputs = cm.CIInputs(
+            run_id="12345",
+            event_name="pull_request",
+            commit_ref="feature",
+            base_ref="HEAD^",
+            build_variant="release",
+        )
+        targets = cm.select_targets(inputs)
+        self.assertTrue(cm._targets_supported_by_main_baseline(targets))
+
+    def test_schedule_targets_are_not_supported_by_main_baseline(self):
+        inputs = cm.CIInputs(
+            run_id="12345",
+            event_name="schedule",
+            commit_ref="main",
+            base_ref="HEAD^1",
+            build_variant="release",
+        )
+        targets = cm.select_targets(inputs)
+        self.assertFalse(cm._targets_supported_by_main_baseline(targets))
+
+    @patch("configure_multi_arch_ci.subprocess.run")
+    def test_lookup_latest_successful_run_id_searches_farther_back(self, mock_run):
+        mock_run.return_value = Mock(
+            returncode=0,
+            stdout='[{"databaseId":12345,"conclusion":"success"}]',
+        )
+        run_id = cm._lookup_latest_successful_run_id()
+        self.assertEqual(run_id, "12345")
+        self.assertIn("--limit", mock_run.call_args.args[0])
+        limit_index = mock_run.call_args.args[0].index("--limit")
+        self.assertEqual(mock_run.call_args.args[0][limit_index + 1], "50")
 
 
 # ---------------------------------------------------------------------------
@@ -832,6 +906,83 @@ class TestConfigurePipeline(unittest.TestCase):
         outputs = cm.configure(inputs, cm.GitContext())
         self.assertFalse(outputs.is_ci_enabled)
         self.assertIsNone(outputs.builds.linux)
+
+    @patch("configure_multi_arch_ci._lookup_latest_successful_run_id")
+    @patch("configure_multi_arch_ci.should_skip_ci", return_value=False)
+    def test_test_only_change_resolves_baseline_run_id(self, _skip, mock_lookup):
+        """Test-only change auto-resolves baseline_run_id via gh CLI lookup."""
+        mock_lookup.return_value = "99999"
+        inputs = cm.CIInputs(
+            run_id="12345",
+            event_name="pull_request",
+            commit_ref="feature",
+            base_ref="HEAD^",
+            build_variant="release",
+        )
+        git = cm.GitContext(
+            changed_files=[
+                "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            ],
+            test_only=True,
+        )
+        outputs = cm.configure(inputs, git)
+        self.assertTrue(outputs.is_ci_enabled)
+        self.assertEqual(
+            sorted(outputs.jobs.build_rocm.prebuilt_stages),
+            sorted(cm._ALL_BUILD_STAGE_NAMES),
+        )
+        self.assertEqual(outputs.jobs.build_rocm.baseline_run_id, "99999")
+        mock_lookup.assert_called_once()
+
+    @patch("configure_multi_arch_ci._lookup_latest_successful_run_id")
+    @patch("configure_multi_arch_ci.should_skip_ci", return_value=False)
+    def test_test_only_falls_back_on_lookup_failure(self, _skip, mock_lookup):
+        """If baseline run lookup fails, fall back to full build."""
+        mock_lookup.return_value = ""
+        inputs = cm.CIInputs(
+            run_id="12345",
+            event_name="pull_request",
+            commit_ref="feature",
+            base_ref="HEAD^",
+            build_variant="release",
+        )
+        git = cm.GitContext(
+            changed_files=[
+                "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            ],
+            test_only=True,
+        )
+        outputs = cm.configure(inputs, git)
+        self.assertTrue(outputs.is_ci_enabled)
+        self.assertEqual(outputs.jobs.build_rocm.prebuilt_stages, [])
+        self.assertEqual(outputs.jobs.build_rocm.baseline_run_id, "")
+
+    @patch("configure_multi_arch_ci._lookup_latest_successful_run_id")
+    @patch("configure_multi_arch_ci._targets_supported_by_main_baseline")
+    @patch("configure_multi_arch_ci.should_skip_ci", return_value=False)
+    def test_test_only_unsupported_targets_fall_back_without_lookup(
+        self, _skip, mock_targets_supported, mock_lookup
+    ):
+        """Unsupported target sets should skip baseline lookup and rebuild."""
+        mock_targets_supported.return_value = False
+        inputs = cm.CIInputs(
+            run_id="12345",
+            event_name="pull_request",
+            commit_ref="feature",
+            base_ref="HEAD^",
+            build_variant="release",
+        )
+        git = cm.GitContext(
+            changed_files=[
+                "build_tools/github_actions/test_executable_scripts/test_rocprim.py",
+            ],
+            test_only=True,
+        )
+        outputs = cm.configure(inputs, git)
+        self.assertTrue(outputs.is_ci_enabled)
+        self.assertEqual(outputs.jobs.build_rocm.prebuilt_stages, [])
+        self.assertEqual(outputs.jobs.build_rocm.baseline_run_id, "")
+        mock_lookup.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

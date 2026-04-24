@@ -47,6 +47,7 @@ Outputs (written to GITHUB_OUTPUT):
 import enum
 import json
 import os
+import subprocess
 from dataclasses import asdict, dataclass, field, fields
 
 
@@ -55,8 +56,71 @@ from configure_ci_path_filters import (
     get_git_modified_paths,
     get_git_submodule_paths,
     is_ci_run_required,
+    is_test_only_change,
 )
 from github_actions_api import gha_append_step_summary, gha_set_output
+
+# All build stage names from BUILD_TOPOLOGY.toml. When a test-only change is
+# detected, all stages are marked PREBUILT so the build is skipped entirely
+# and tests run against artifacts from the latest successful main branch run.
+_ALL_BUILD_STAGE_NAMES = [
+    "foundation",
+    "compiler-runtime",
+    "math-libs",
+    "comm-libs",
+    "debug-tools",
+    "dctools-core",
+    "iree-compiler",
+    "fusilli-libs",
+    "profiler-apps",
+    "media-libs",
+]
+
+
+def _lookup_latest_successful_run_id(
+    workflow_name: str = "Multi-Arch CI", search_limit: int = 50
+) -> str:
+    """Find the run ID of the latest successful CI run on main.
+
+    Uses the GitHub CLI (available in GitHub Actions runners) to query
+    completed workflow runs. Returns empty string on failure.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "gh",
+                "run",
+                "list",
+                "--workflow",
+                workflow_name,
+                "--branch",
+                "main",
+                "--status",
+                "completed",
+                "--json",
+                "databaseId,conclusion",
+                "--limit",
+                str(search_limit),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            print(f"  gh run list failed: {result.stderr.strip()}")
+            return ""
+        runs = json.loads(result.stdout)
+        for run in runs:
+            if run.get("conclusion") == "success":
+                run_id = str(run["databaseId"])
+                print(f"  Found baseline run ID: {run_id}")
+                return run_id
+        print("  No successful runs found on main")
+        return ""
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"  Baseline run lookup failed: {e}")
+        return ""
+
 
 # ---------------------------------------------------------------------------
 # Input parsing helpers
@@ -195,14 +259,19 @@ class GitContext:
     # List of paths of all git submodules in the repo
     submodule_paths: list[str] | None = None
 
+    # True when all CI-relevant changes are test-only (no build needed)
+    test_only: bool = False
+
     @staticmethod
     def from_repo(base_ref: str) -> "GitContext":
         """Compute from the actual repo. Only called from main()."""
         changed_files = get_git_modified_paths(base_ref)
         submodule_paths = list(get_git_submodule_paths() or [])
+        test_only = is_test_only_change(changed_files) if changed_files else False
         return GitContext(
             changed_files=changed_files,
             submodule_paths=submodule_paths,
+            test_only=test_only,
         )
 
     @staticmethod
@@ -224,6 +293,8 @@ class GitContext:
             print(f"  {path}")
         if len(self.changed_files) > 20:
             print(f"  ... and {len(self.changed_files) - 20} more")
+        if self.test_only:
+            print("  → test-only change detected (build can use prebuilt artifacts)")
 
 
 @dataclass(frozen=True)
@@ -546,18 +617,25 @@ def decide_jobs(
     """Determine which job groups to run, skip, or satisfy with prebuilt files."""
 
     # Build ROCm.
-    # TODO(#3399): Use changed files and build_topology.py to:
-    #   1. set per-stage prebuilt decisions
-    #   2. skip job groups that aren't reachable from the changed files
     # Parse explicit prebuilt stages from workflow_dispatch input.
     stage_decisions: dict[str, JobAction] = {}
+    baseline_run_id = ci_inputs.baseline_run_id
+
     if ci_inputs.prebuilt_stages:
         for stage in _parse_comma_list(ci_inputs.prebuilt_stages):
             stage_decisions[stage] = JobAction.PREBUILT
+    elif git_context.test_only:
+        # Test-only change: skip the entire build by marking all stages
+        # as PREBUILT. The baseline_run_id is resolved later in configure()
+        # via _lookup_latest_successful_run_id().
+        print("  Test-only change: marking all build stages as PREBUILT")
+        for stage in _ALL_BUILD_STAGE_NAMES:
+            stage_decisions[stage] = JobAction.PREBUILT
+
     build_rocm = BuildRocmDecision(
         action=JobAction.RUN,
         stage_decisions=stage_decisions,
-        baseline_run_id=ci_inputs.baseline_run_id,
+        baseline_run_id=baseline_run_id,
     )
 
     # Test ROCm.
@@ -706,6 +784,33 @@ def select_targets(ci_inputs: CIInputs) -> TargetSelection:
         linux_families=linux_names,
         windows_families=windows_names,
     )
+
+
+def _targets_supported_by_main_baseline(targets: TargetSelection) -> bool:
+    """Check whether target selection is compatible with normal main baselines.
+
+    The automatic prebuilt-artifact optimization for test-only changes uses the
+    latest successful `main` run of `Multi-Arch CI` as its baseline. Those
+    runs build the push default target set: presubmit + postsubmit families.
+    If a PR requests additional families (for example via `ci:run-all-archs`)
+    that are not part of that baseline, we must fall back to a full build.
+    """
+    main_baseline_families = get_all_families_for_trigger_types(
+        ["presubmit", "postsubmit"]
+    )
+    supported_linux = set(
+        _filter_families_by_platform(
+            list(main_baseline_families.keys()), "linux", main_baseline_families
+        )
+    )
+    supported_windows = set(
+        _filter_families_by_platform(
+            list(main_baseline_families.keys()), "windows", main_baseline_families
+        )
+    )
+    return set(targets.linux_families).issubset(supported_linux) and set(
+        targets.windows_families
+    ).issubset(supported_windows)
 
 
 # ---------------------------------------------------------------------------
@@ -923,11 +1028,52 @@ def configure(ci_inputs: CIInputs, git_context: GitContext) -> CIOutputs:
 
     print("\n=== Deciding job configuration ===")
     jobs = decide_jobs(ci_inputs=ci_inputs, git_context=git_context)
-    jobs.log()
 
     print("\n=== Selecting GPU target families ===")
     targets = select_targets(ci_inputs)
     targets.log()
+
+    # Auto-resolve baseline_run_id for test-only changes when none was
+    # explicitly provided. Falls back to full build if lookup fails.
+    if jobs.build_rocm.prebuilt_stages and not jobs.build_rocm.baseline_run_id:
+        if not _targets_supported_by_main_baseline(targets):
+            print(
+                "\n=== Baseline target compatibility check failed ==="
+            )
+            print(
+                "  WARNING: Selected targets are not all produced by normal "
+                "main baselines; falling back to full build"
+            )
+        else:
+            print("\n=== Resolving baseline run ID for prebuilt stages ===")
+            baseline_run_id = _lookup_latest_successful_run_id()
+            if baseline_run_id:
+                jobs = JobDecisions(
+                    build_rocm=BuildRocmDecision(
+                        action=jobs.build_rocm.action,
+                        stage_decisions=jobs.build_rocm.stage_decisions,
+                        baseline_run_id=baseline_run_id,
+                    ),
+                    test_rocm=jobs.test_rocm,
+                    build_rocm_python=jobs.build_rocm_python,
+                    build_pytorch=jobs.build_pytorch,
+                    test_pytorch=jobs.test_pytorch,
+                )
+            else:
+                print(
+                    "  WARNING: Could not find baseline run, "
+                    "falling back to full build"
+                )
+        if not jobs.build_rocm.baseline_run_id:
+            jobs = JobDecisions(
+                build_rocm=BuildRocmDecision(action=JobAction.RUN),
+                test_rocm=jobs.test_rocm,
+                build_rocm_python=jobs.build_rocm_python,
+                build_pytorch=jobs.build_pytorch,
+                test_pytorch=jobs.test_pytorch,
+            )
+
+    jobs.log()
 
     print("\n=== Building per-platform configs ===")
     builds = expand_build_configs(
