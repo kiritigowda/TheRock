@@ -53,6 +53,70 @@ logger = logging.getLogger(__name__)
 # Repository root, used for locating .gitmodules.
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# File path prefixes that indicate infrastructure changes which can affect any
+# component. When these are detected and no CHANGED_ARTIFACTS is explicitly
+# provided, the pipeline should fall back to running all tests.
+_INFRASTRUCTURE_PREFIXES = (
+    "cmake/",
+    "build_tools/",
+    "patches/",
+    ".github/",
+    "dockerfiles/",
+    "external-builds/",
+)
+
+# Top-level files that are also infrastructure.
+_INFRASTRUCTURE_FILES = (
+    "CMakeLists.txt",
+    "FLAGS.cmake",
+    "BUILD_TOPOLOGY.toml",
+    "requirements.txt",
+)
+
+# Component wrapper directories -- changes to CMakeLists.txt or hook files in
+# these dirs affect the build for all artifacts in that component category.
+_COMPONENT_WRAPPER_DIRS = (
+    "core/",
+    "math-libs/",
+    "ml-libs/",
+    "comm-libs/",
+    "profiler/",
+    "dctools/",
+    "debug-tools/",
+    "media-libs/",
+    "compiler/",
+    "base/",
+    "iree-libs/",
+    "third-party/",
+)
+
+
+def _is_infrastructure_file(file_path: str) -> bool:
+    """Return True if the file path is an infrastructure/build-system file.
+
+    These files can affect any component and should trigger full CI when
+    no explicit CHANGED_ARTIFACTS is provided.
+    """
+    if file_path in _INFRASTRUCTURE_FILES:
+        return True
+    if any(file_path.startswith(prefix) for prefix in _INFRASTRUCTURE_PREFIXES):
+        return True
+    # Component wrapper files (CMakeLists.txt, hooks, .toml) outside submodule dirs
+    if any(file_path.startswith(d) for d in _COMPONENT_WRAPPER_DIRS):
+        # Only flag non-submodule files in these dirs (the submodule files
+        # are handled by the normal mapping). We detect this by checking if the
+        # file is a direct child like core/CMakeLists.txt or a hook/toml file.
+        parts = file_path.split("/")
+        if len(parts) <= 2:
+            return True
+        # Files like math-libs/pre_hook_foo.cmake or core/artifact-hip.toml
+        if any(
+            parts[-1].endswith(ext)
+            for ext in (".cmake", ".toml", ".py", ".ps1", ".sh")
+        ):
+            return True
+    return False
+
 # Maps BUILD_TOPOLOGY artifact names to fetch_test_configurations.py test_matrix
 # keys. Each artifact maps to the test components that exercise it.
 ARTIFACT_TO_TEST_LABELS: dict[str, list[str]] = {
@@ -68,6 +132,7 @@ ARTIFACT_TO_TEST_LABELS: dict[str, list[str]] = {
         "rocroller",
         "origami",
     ],
+    "rocblas": ["hipblas", "rocsolver"],
     "prim": ["rocprim", "hipcub", "rocthrust"],
     "rand": ["rocrand", "hiprand"],
     "fft": ["rocfft", "hipfft"],
@@ -77,7 +142,7 @@ ARTIFACT_TO_TEST_LABELS: dict[str, list[str]] = {
     "libhipcxx": ["libhipcxx_hipcc", "libhipcxx_hiprtc"],
     "miopen": ["miopen"],
     "composable-kernel": [],
-    "hipdnn": ["hipdnn", "hipdnn-integration-tests"],
+    "hipdnn": ["hipdnn", "hipdnn_install", "hipdnn-integration-tests"],
     "hipdnn-integration-tests": ["hipdnn-integration-tests"],
     "miopenprovider": ["miopenprovider"],
     "hipblasltprovider": ["hipblasltprovider"],
@@ -153,19 +218,21 @@ def detect_changed_artifacts_from_files(
     changed_files: list[str],
     topology: "BuildTopology | None" = None,
     gitmodules_path: Path | None = None,
-) -> list[str]:
+) -> tuple[list[str], bool]:
     """Map changed file paths to affected artifact names.
 
     The mapping chain is:
         changed file path -> submodule path -> submodule name ->
         source_set -> artifact_group -> artifacts
 
-    Files that don't map to any submodule (e.g., build_tools/, cmake/) are
-    logged as warnings but do not cause all artifacts to be selected -- the
-    caller should handle that policy decision.
+    Files that don't map to any submodule are classified as either
+    infrastructure files (build system, cmake, patches) or documentation.
+    Infrastructure file changes are reported to the caller so it can decide
+    to fall back to full CI.
 
     Returns:
-        Sorted list of artifact names directly affected by the file changes.
+        Tuple of (sorted artifact names, infrastructure_changed flag).
+        When infrastructure_changed is True, the caller should run all tests.
     """
     if topology is None:
         topology = get_topology()
@@ -200,9 +267,25 @@ def detect_changed_artifacts_from_files(
         if not matched:
             unmapped_files.append(file_path)
 
-    if unmapped_files:
+    # Step 3b: Classify unmapped files
+    infra_files: list[str] = []
+    doc_files: list[str] = []
+    for f in unmapped_files:
+        if _is_infrastructure_file(f):
+            infra_files.append(f)
+        else:
+            doc_files.append(f)
+
+    infrastructure_changed = len(infra_files) > 0
+
+    if infra_files:
+        logger.warning(
+            "Infrastructure files changed (may require full CI): %s", infra_files
+        )
+    if doc_files:
         logger.info(
-            "Files not mapped to any submodule (skipped): %s", unmapped_files
+            "Non-infrastructure files not mapped to any submodule (skipped): %s",
+            doc_files,
         )
 
     # Step 4: Collect artifacts from affected groups
@@ -221,7 +304,7 @@ def detect_changed_artifacts_from_files(
             sorted(affected_groups),
         )
 
-    return sorted(affected_artifacts)
+    return sorted(affected_artifacts), infrastructure_changed
 
 
 def _get_downstream_artifacts(
@@ -381,12 +464,27 @@ def main():
             logger.warning("CHANGED_FILES is empty, no tests to configure")
             gha_set_output(empty_outputs)
             return
-        changed_artifacts = detect_changed_artifacts_from_files(changed_files)
+
+        topology = get_topology()
+        changed_artifacts, infrastructure_changed = (
+            detect_changed_artifacts_from_files(changed_files)
+        )
         logger.info(
             "Auto-detected artifacts from %d changed files: %s",
             len(changed_files),
             changed_artifacts,
         )
+
+        if infrastructure_changed:
+            # Infrastructure changes (cmake/, patches/, build_tools/, etc.) can
+            # affect any component. Fall back to testing all known artifacts.
+            all_artifact_names = sorted(topology.artifacts.keys())
+            logger.warning(
+                "Infrastructure files changed -- falling back to all artifacts: %s",
+                all_artifact_names,
+            )
+            changed_artifacts = all_artifact_names
+
         if not changed_artifacts:
             logger.warning(
                 "No artifacts mapped from changed files, no tests to configure"

@@ -22,6 +22,7 @@ from _therock_utils.build_topology import BuildTopology
 
 from configure_downstream_tests import (
     ARTIFACT_TO_TEST_LABELS,
+    _is_infrastructure_file,
     _parse_comma_list,
     _parse_gitmodules,
     _build_submodule_to_source_sets,
@@ -458,7 +459,7 @@ class TestDetectChangedArtifactsFromFiles(unittest.TestCase):
 
     def test_submodule_path_maps_to_artifacts(self):
         """A change in rocm-libraries maps to math and ml artifacts."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             ["rocm-libraries"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
@@ -467,58 +468,74 @@ class TestDetectChangedArtifactsFromFiles(unittest.TestCase):
         self.assertIn("blas", result)
         self.assertIn("prim", result)
         self.assertIn("miopen", result)
+        self.assertFalse(infra)
 
     def test_submodule_subpath_maps_to_artifacts(self):
         """A file within a submodule path should still match."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             ["compiler/amd-llvm/lib/Target/AMDGPU/foo.cpp"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
         )
         # compiler/amd-llvm -> llvm-project -> compiler-src -> compiler group
         self.assertIn("amd-llvm", result)
+        self.assertFalse(infra)
 
     def test_rocm_systems_maps_to_core(self):
         """rocm-systems submodule maps to core artifacts."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             ["rocm-systems"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
         )
         self.assertIn("core-hip", result)
         self.assertIn("core-runtime", result)
+        self.assertFalse(infra)
 
     def test_unmapped_files_return_empty(self):
-        """Files not under any submodule should not map to artifacts."""
-        result = detect_changed_artifacts_from_files(
+        """Infrastructure files not under any submodule flag infra_changed."""
+        result, infra = detect_changed_artifacts_from_files(
             ["build_tools/some_script.py", "cmake/foo.cmake"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
         )
         self.assertEqual(result, [])
+        self.assertTrue(infra)
+
+    def test_doc_only_files_no_infra_flag(self):
+        """Doc-only changes should not flag infrastructure_changed."""
+        result, infra = detect_changed_artifacts_from_files(
+            ["README.md", "docs/guide.md", "LICENSE"],
+            topology=self.topology,
+            gitmodules_path=self.gitmodules_path,
+        )
+        self.assertEqual(result, [])
+        self.assertFalse(infra)
 
     def test_mixed_files(self):
         """Mix of submodule and non-submodule files."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             ["rocm-libraries", "build_tools/foo.py", "README.md"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
         )
         self.assertIn("blas", result)
-        # build_tools and README should not add extra artifacts
+        # build_tools is infrastructure
+        self.assertTrue(infra)
 
     def test_empty_file_list(self):
         """Empty input returns empty output."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             [],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
         )
         self.assertEqual(result, [])
+        self.assertFalse(infra)
 
     def test_multiple_submodules_union(self):
         """Changes in multiple submodules produce the union of artifacts."""
-        result = detect_changed_artifacts_from_files(
+        result, infra = detect_changed_artifacts_from_files(
             ["rocm-systems", "compiler/amd-llvm"],
             topology=self.topology,
             gitmodules_path=self.gitmodules_path,
@@ -526,6 +543,49 @@ class TestDetectChangedArtifactsFromFiles(unittest.TestCase):
         # Should have core artifacts + compiler artifacts
         self.assertIn("core-hip", result)
         self.assertIn("amd-llvm", result)
+        self.assertFalse(infra)
+
+
+class TestIsInfrastructureFile(unittest.TestCase):
+    """Test infrastructure file classification."""
+
+    def test_cmake_files(self):
+        self.assertTrue(_is_infrastructure_file("cmake/foo.cmake"))
+        self.assertTrue(_is_infrastructure_file("cmake/therock/FindROCm.cmake"))
+
+    def test_build_tools(self):
+        self.assertTrue(_is_infrastructure_file("build_tools/some_script.py"))
+        self.assertTrue(
+            _is_infrastructure_file("build_tools/github_actions/configure_ci.py")
+        )
+
+    def test_patches(self):
+        self.assertTrue(_is_infrastructure_file("patches/llvm-project/foo.patch"))
+
+    def test_top_level_infra_files(self):
+        self.assertTrue(_is_infrastructure_file("CMakeLists.txt"))
+        self.assertTrue(_is_infrastructure_file("FLAGS.cmake"))
+        self.assertTrue(_is_infrastructure_file("BUILD_TOPOLOGY.toml"))
+
+    def test_component_wrapper_files(self):
+        self.assertTrue(_is_infrastructure_file("core/CMakeLists.txt"))
+        self.assertTrue(_is_infrastructure_file("math-libs/pre_hook_blas.cmake"))
+        self.assertTrue(_is_infrastructure_file("ml-libs/artifact-miopen.toml"))
+
+    def test_docs_not_infra(self):
+        self.assertFalse(_is_infrastructure_file("README.md"))
+        self.assertFalse(_is_infrastructure_file("docs/guide.md"))
+        self.assertFalse(_is_infrastructure_file("CONTRIBUTING.md"))
+        self.assertFalse(_is_infrastructure_file("LICENSE"))
+
+    def test_github_workflows(self):
+        self.assertTrue(
+            _is_infrastructure_file(".github/workflows/multi_arch_ci.yml")
+        )
+
+    def test_version_json_not_infra(self):
+        """version.json is not in the infra list (low risk)."""
+        self.assertFalse(_is_infrastructure_file("version.json"))
 
 
 if __name__ == "__main__":
