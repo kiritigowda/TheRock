@@ -96,10 +96,19 @@ all_build_variants = {
             # "build_variant_cmake_preset": "linux-release-package",
             "build_variant_cmake_preset": "",
         },
+        # full ASAN builds are run on nightly
         "asan": {
             "build_variant_label": "asan",
             "build_variant_suffix": "asan",
             "build_variant_cmake_preset": "linux-release-asan",
+        },
+        # host ASAN builds are run on nightly, with intent to run on presubmit and postsubmit
+        # host ASAN detects memory errors on host code (excluding kernel binaries), while ASAN sanitizes everything
+        "host-asan": {
+            "build_variant_label": "host-asan",
+            "build_variant_suffix": "host-asan",
+            "build_variant_cmake_preset": "linux-release-host-asan",
+            "expect_failure": True,
         },
         "tsan": {
             "build_variant_label": "tsan",
@@ -176,7 +185,7 @@ amdgpu_family_info_matrix_presubmit = {
             # Individual GPU target(s) on the test runner, for fetching split artifacts.
             # TODO(#3444): ASAN variants may need xnack suffix expansion (e.g. gfx942:xnack+).
             "fetch-gfx-targets": ["gfx942"],
-            "build_variants": ["release", "asan", "tsan"],
+            "build_variants": ["release", "asan", "host-asan", "tsan"],
         }
     },
     "gfx110x": {
