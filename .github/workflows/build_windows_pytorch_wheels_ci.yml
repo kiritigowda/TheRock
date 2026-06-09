@@ -111,7 +111,7 @@ jobs:
       SCCACHE_S3_KEY_PREFIX: "windows/${{ inputs.artifact_group }}/"
       SCCACHE_S3_USE_SSL: "true"
       SCCACHE_S3_SERVER_SIDE_ENCRYPTION: "true"
-      SCCACHE_IDLE_TIMEOUT: "600"
+      SCCACHE_IDLE_TIMEOUT: "0" # never idle-out; keeps stats accurate on long builds
       SCCACHE_LOG: warn
     defaults:
       run:
