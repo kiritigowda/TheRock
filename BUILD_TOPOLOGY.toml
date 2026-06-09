@@ -124,6 +124,10 @@ description = "ROCm media submodules (Mesa for VA-API)"
 submodules = ["amd-mesa"]
 disable_platforms = ["windows"]
 
+[source_sets.cv-libs]
+description = "ROCm computer vision libraries submodules (RPP lives in rocm-libraries)"
+submodules = []
+
 [source_sets.media-libs]
 description = "ROCm media libraries submodules"
 submodules = []
@@ -167,6 +171,10 @@ type = "per-arch"
 description = "Communication libraries (generic, single job parallel to math-libs)"
 artifact_groups = ["comm-libs"]
 type = "generic"
+
+[build_stages.cv-libs]
+description = "Computer Vision Libraries"
+artifact_groups = ["cv-libs"]
 
 [build_stages.debug-tools]
 description = "ROCm debug tools"
@@ -305,6 +313,14 @@ description = "Profiler applications and analysis tools"
 type = "generic"
 artifact_group_deps = ["profiler-core", "compiler", "core-amdsmi"]
 source_sets = ["rocm-systems"]
+
+[artifact_groups.cv-libs]
+description = "Computer Vision Libraries"
+type = "generic"
+artifact_group_deps = ["third-party-sysdeps", "base", "core-runtime", "hip-runtime"]
+# RPP sources live in the rocm-libraries monorepo. rocm-systems is included for
+# projects/hip/VERSION (see CMakeLists.txt).
+source_sets = ["rocm-libraries", "rocm-systems"]
 
 [artifact_groups.media-libs]
 description = "Media Libraries"
@@ -647,6 +663,17 @@ artifact_deps = ["core-runtime", "core-hip", "miopen", "hipdnn", "miopenprovider
 artifact_group = "ml-libs"
 type = "target-neutral"
 artifact_deps = ["core-runtime", "core-hip", "hipdnn", "hipdnn-integration-tests"]
+
+# --- Computer Vision Integration ---
+
+[artifacts.rpp]
+artifact_group = "cv-libs"
+type = "target-neutral"
+# RPP needs the HIP runtime (core-hip), the half headers from base and the
+# bundled sysdeps. The compiler (amd-llvm) comes transitively via core-hip.
+# It does NOT use the Mesa VA-API driver or the profiler.
+artifact_deps = ["core-runtime", "core-hip", "base", "sysdeps"]
+feature_group = "CV_LIBS" # Controlled by THEROCK_ENABLE_CV_LIBS
 
 # --- Media Integration ---
 

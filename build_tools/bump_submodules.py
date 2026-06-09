@@ -65,7 +65,7 @@ def parse_components(components: list[str]) -> list[list]:
             "rocm-cmake",
         ]
 
-    if "rocm-libraries" in components:
+    if "rocm-libraries" in components or "cv-libs" in components:
         arguments.append("--include-rocm-libraries")
         arguments.append("--include-ml-frameworks")
     else:
@@ -190,6 +190,7 @@ def main(argv):
                   profiler,
                   debug-tools,
                   media-libs,
+                  cv-libs,
                   math-libraries
              """,
     )

@@ -69,6 +69,7 @@ ROCM_COMPONENT_DIRS = {
     "profiler",
     "ml-libs",
     "media-libs",
+    "cv-libs",
 }
 
 # Regex to parse artifact filenames: <project>_<variant>[_suffix].tar.xz
