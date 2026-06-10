@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000001 Mon Sep 17 00:00:00 2001
+From: therockbot <therockbot@amd.com>
+Date: Wed, 10 Jun 2026 00:00:00 +0000
+Subject: [PATCH] rpp: make public include directories relocatable
+
+TheRock builds rpp with an empty ROCM_PATH (-DROCM_PATH=), matching the
+convention used for every other ROCm subproject. rpp's fallback
+`set(ROCM_PATH /opt/rocm CACHE PATH ...)` cannot override an already-set
+(empty) cache entry, so ROCM_PATH stays empty and the unwrapped
+`${ROCM_PATH}/include` public include directory collapses to the absolute
+path `/include`.
+
+Because that entry is not wrapped in a BUILD_INTERFACE/INSTALL_INTERFACE
+generator expression (unlike the neighboring api entry), it is exported
+verbatim into the installed lib/cmake/rpp/rpp-targets.cmake. Any consumer
+(e.g. the packaged rpp test suite, which calls find_package(rpp)) then
+fails configuration with:
+
+  CMake Error in CMakeLists.txt:
+    Imported target "rpp::rpp" includes non-existent path
+      "/include"
+    in its INTERFACE_INCLUDE_DIRECTORIES.
+
+Make the entry relocatable: use ${ROCM_PATH}/include only in the build
+tree (BUILD_INTERFACE) and advertise the install-tree include directory
+(INSTALL_INTERFACE) to downstream consumers instead of baking an absolute
+path. The HIP/ROCm host headers are also supplied transitively via the
+PUBLIC hip::host link dependency, so no consumer-visible headers are lost.
+
+Upstream tracking: https://github.com/ROCm/rocm-libraries/pull/8295
+Once that merges and TheRock's rocm-libraries submodule is bumped past it,
+this patch can be dropped.
+
+Signed-off-by: therockbot <therockbot@amd.com>
+---
+ projects/rpp/CMakeLists.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/projects/rpp/CMakeLists.txt b/projects/rpp/CMakeLists.txt
+--- a/projects/rpp/CMakeLists.txt
++++ b/projects/rpp/CMakeLists.txt
+@@ -366,7 +366,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION} SOVE
+ target_include_directories(${PROJECT_NAME}
+     PUBLIC
+         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>"
+-        "${ROCM_PATH}/include"
++        "$<BUILD_INTERFACE:${ROCM_PATH}/include>"
++        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+     PRIVATE
+         "${CMAKE_CURRENT_SOURCE_DIR}/src/include/cpu"
+         "${CMAKE_CURRENT_SOURCE_DIR}/src/include/common"
+-- 
+2.54.0
+
