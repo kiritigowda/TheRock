@@ -648,7 +648,8 @@ test_matrix = {
     "rpp": {
         "job_name": "rpp",
         "fetch_artifact_args": "--rpp --tests",
-        "timeout_minutes": 30,
+        # Headroom for RPP's long QA suites (installed test tree configure + ctest).
+        "timeout_minutes": 120,
         "test_script": f"python {_get_script_path('test_rpp.py')}",
         "platform": ["linux"],
         "total_shards_dict": {
