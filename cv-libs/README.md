@@ -7,9 +7,8 @@ This directory contains computer vision libraries for AMD GPUs.
 
 ## Dependencies
 
-Unlike the media libraries (rocDecode / rocJPEG), RPP does not require the
-bundled Mesa VA-API driver. It only depends on the HIP runtime, the
-half-precision floating-point headers and OpenMP.
+RPP depends on the HIP runtime, the half-precision floating-point headers,
+and OpenMP.
 
 The library can be individually controlled:
 

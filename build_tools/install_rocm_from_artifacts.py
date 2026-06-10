@@ -479,7 +479,6 @@ def retrieve_artifacts_by_run_id(args):
         if args.rpp:
             extra_artifacts.append("rpp")
             argv.append("rpp_dev")
-            argv.append("rpp_test")
             argv.append("base_dev")
             argv.append("amd-llvm_dev")
         if args.libhipcxx:

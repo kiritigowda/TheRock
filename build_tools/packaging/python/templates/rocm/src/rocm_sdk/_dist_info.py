@@ -263,7 +263,6 @@ LibraryEntry("amd_comgr", "core", "libamd_comgr.so*", "amd_comgr*.dll")
 LibraryEntry("rocm_smi64", "core", "librocm_smi64.so*", "")
 LibraryEntry("rocdecode", "core", "librocdecode.so*", "")
 LibraryEntry("rocjpeg", "core", "librocjpeg.so*", "")
-LibraryEntry("rpp", "core", "librpp.so*", "rpp*.dll")
 LibraryEntry("hipblas", "libraries", "libhipblas.so*", "*hipblas*.dll")
 LibraryEntry("hipblaslt", "libraries", "libhipblaslt.so*", "*hipblaslt*.dll")
 LibraryEntry("hipfft", "libraries", "libhipfft.so*", "hipfft*.dll")
@@ -274,6 +273,7 @@ LibraryEntry("hipsolver", "libraries", "libhipsolver.so*", "hipsolver*.dll")
 LibraryEntry("rccl", "libraries", "librccl.so*", "")
 LibraryEntry("miopen", "libraries", "libMIOpen.so*", "MIOpen*.dll")
 LibraryEntry("hipdnn", "libraries", "libhipdnn_backend.so*", "hipdnn_backend*.dll")
+LibraryEntry("rpp", "libraries", "librpp.so*", "rpp*.dll")
 
 # Others we may want:
 # hiprtc-builtins

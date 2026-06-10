@@ -7,9 +7,8 @@ if(THEROCK_ENABLE_RPP)
   ##############################################################################
   # RPP is a comprehensive, high-performance computer vision library for AMD
   # processors with a HIP backend. Its sources live in the rocm-libraries
-  # monorepo (projects/rpp). Unlike the media-libs (rocDecode/rocJPEG), RPP does
-  # not depend on the Mesa VA-API driver or the profiler; it only needs the HIP
-  # runtime, the half-precision headers and OpenMP.
+  # monorepo (projects/rpp). It only needs the HIP runtime, the half-precision
+  # headers and OpenMP.
 
   therock_cmake_subproject_declare(rpp
     USE_DIST_AMDGPU_TARGETS
