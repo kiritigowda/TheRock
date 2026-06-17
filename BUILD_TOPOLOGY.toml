@@ -131,6 +131,7 @@ disable_platforms = ["windows"]
 [source_sets.cv-libs]
 description = "ROCm computer vision libraries submodules (RPP lives in rocm-libraries)"
 submodules = []
+disable_platforms = ["windows"]
 
 [source_sets.media-libs]
 description = "ROCm media libraries submodules"
