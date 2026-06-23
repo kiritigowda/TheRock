@@ -31,6 +31,11 @@ if(THEROCK_ENABLE_RPP)
       -DRPP_AUDIO_SUPPORT=OFF
     CMAKE_INCLUDES
       therock_explicit_finders.cmake
+    # RPP's bundled test suite (utilities/test_suite) calls find_package(rpp)
+    # on itself. Ignore it so the dep provider falls through to the system
+    # resolver instead of erroring on an undeclared super-project package.
+    IGNORE_PACKAGES
+      rpp
     INTERFACE_LINK_DIRS
       "lib"
     INSTALL_RPATH_DIRS
