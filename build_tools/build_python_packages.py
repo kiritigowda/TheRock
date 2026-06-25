@@ -378,6 +378,7 @@ def core_artifact_filter(an: ArtifactName) -> bool:
         "core-ocl",
         "core-hipinfo",
         "core-runtime",
+        "hipfile",
         "hipify",
         "host-blas",
         "host-suite-sparse",
@@ -393,6 +394,7 @@ def core_artifact_filter(an: ArtifactName) -> bool:
         "sysdeps-gmp",
         "sysdeps-mpfr",
         "sysdeps-ncurses",
+        "sysdeps-util-linux",
         "wsl-rocdxg",
     ] and an.component in [
         "lib",
