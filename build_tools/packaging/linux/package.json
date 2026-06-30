@@ -3782,6 +3782,17 @@
             ]
           }
         ]
+      },
+      {
+        "Artifact": "mirage",
+        "Artifact_Subdir": [
+          {
+            "Name": "mirage",
+            "Components": [
+              "run"
+            ]
+          }
+        ]
       }
     ],
     "Gfxarch": "False"
