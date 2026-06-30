@@ -54,11 +54,13 @@ def _get_script_path(script_name: str) -> str:
 # --ipc host - Allows shared memory between host and container
 # --user 0:0 - Running as root, by recommendation of GitHub: https://docs.github.com/en/actions/reference/workflows-and-actions/dockerfile-support#user
 # --ulimit memlock=-1:-1 - Prevents memory allocation issues with ROCm inside container
+# --ulimit nofile=1048576:1048576 - Increase open file limit for RCCL
 # --security-opt seccomp=unconfined - enables memory mapping, and is recommended for containers running in HPC environments
 _BASE_CONTAINER_OPTIONS = [
     "--ipc host",
     "--user 0:0",
     "--ulimit memlock=-1:-1",
+    "--ulimit nofile=1048576:1048576",
     "--security-opt seccomp=unconfined",
 ]
 
@@ -68,6 +70,7 @@ _BASE_CONTAINER_OPTIONS = [
 # --device /dev/dri - Direct Rendering Infrastructure devices
 # --group-add 993,992,110 - Additional GPU-related groups
 # --env-file /etc/podinfo/gha-gpu-isolation-settings - Required for GPU isolation on OSSCI MIXXX runners
+# -e ROCR_VISIBLE_DEVICES - Pass host's GPU isolation env var to container (used on ARC runners)
 _GPU_CONTAINER_OPTIONS = [
     "--group-add video",
     "--device /dev/kfd",
@@ -76,6 +79,7 @@ _GPU_CONTAINER_OPTIONS = [
     "--group-add 992",
     "--group-add 110",
     "--env-file /etc/podinfo/gha-gpu-isolation-settings",
+    "-e ROCR_VISIBLE_DEVICES",
 ]
 
 
