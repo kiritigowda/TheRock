@@ -129,9 +129,11 @@ submodules = ["amd-mesa"]
 disable_platforms = ["windows"]
 
 [source_sets.cv-libs]
+# RPP is experimental and opt-in on Windows (-DTHEROCK_ENABLE_RPP=ON), so this
+# source set is intentionally not platform-disabled. RPP's sources actually come
+# from the rocm-libraries source set; this entry carries no submodules of its own.
 description = "ROCm computer vision libraries submodules (RPP lives in rocm-libraries)"
 submodules = []
-disable_platforms = ["windows"]
 
 [source_sets.media-libs]
 description = "ROCm media libraries submodules"
@@ -334,8 +336,8 @@ source_sets = ["rocm-systems"]
 description = "Computer Vision Libraries"
 type = "generic"
 artifact_group_deps = ["third-party-sysdeps", "base", "core-runtime", "hip-runtime"]
-# RPP sources live in the rocm-libraries monorepo. rocm-systems is included for
-# projects/hip/VERSION (see CMakeLists.txt).
+# RPP sources live in the rocm-libraries monorepo.
+# TODO: rocm-systems included for projects/hip/VERSION (see CMakeLists.txt)
 source_sets = ["rocm-libraries", "rocm-systems"]
 
 [artifact_groups.media-libs]
@@ -708,6 +710,10 @@ type = "target-neutral"
 # It does NOT use the Mesa VA-API driver or the profiler.
 artifact_deps = ["core-runtime", "core-hip", "base", "sysdeps"]
 feature_group = "CV_LIBS" # Controlled by THEROCK_ENABLE_CV_LIBS
+# Unlike rocdecode/rocjpeg, this artifact intentionally omits
+# disable_platforms = ["windows"]: RPP on Windows is experimental and opt-in
+# (THEROCK_ENABLE_CV_LIBS defaults OFF on Windows, but -DTHEROCK_ENABLE_RPP=ON
+# can enable it). Hard-disabling here would make the opt-in build impossible.
 
 # --- Media Integration ---
 

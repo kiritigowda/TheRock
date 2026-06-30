@@ -27,7 +27,9 @@ if(THEROCK_ENABLE_RPP)
     CMAKE_ARGS
       -DROCM_PATH=
       -DBACKEND=HIP
-      # Audio augmentations require FFTS which is not bundled in TheRock.
+      # Audio augmentations require FFTS, which is not yet bundled in TheRock, so
+      # this is a known functional gap vs. an upstream RPP build.
+      # TODO: bundle FFTS as a sysdep and flip this ON to enable audio support.
       -DRPP_AUDIO_SUPPORT=OFF
     CMAKE_INCLUDES
       therock_explicit_finders.cmake
