@@ -592,9 +592,11 @@ def retrieve_artifacts_by_run_id(args):
         if args.mivisionx:
             extra_artifacts.append("mivisionx")
             # test_mivisionx.py compiles the test suite against the installed tree.
+            #   mivisionx_run - bin/runvx needed by the runvx_test CTest entry.
             #   mivisionx_dev - lib/cmake/mivisionx for find_package(mivisionx), plus headers.
             #   base_dev      - include/half/half.hpp needed by mivisionx headers.
             #   amd-llvm_dev  - lib/llvm/lib/cmake/AMDDeviceLibs for HIP resolution.
+            argv.append("mivisionx_run")
             argv.append("mivisionx_dev")
             argv.append("base_dev")
             argv.append("amd-llvm_dev")

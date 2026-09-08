@@ -765,7 +765,10 @@ feature_group = "CV_LIBS"
 artifact_group = "cv-libs"
 type = "target-neutral"
 artifact_deps = ["core-runtime", "core-hip", "base", "sysdeps", "rpp"]
-feature_group = "CV_LIBS"
+# Opt-in extension: use its own feature group so THEROCK_RESET_FEATURES derives
+# the default from THEROCK_ENABLE_MIVISIONX (OFF) rather than from CV_LIBS (ON
+# on Linux), which would unexpectedly enable MIVisionX on feature reset.
+feature_group = "MIVISIONX"
 disable_platforms = ["windows"]
 
 
