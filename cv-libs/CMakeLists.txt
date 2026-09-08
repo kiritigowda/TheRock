@@ -105,6 +105,7 @@ if(THEROCK_ENABLE_MIVISIONX)
       dev
       doc
       lib
+      run
       test
     SUBPROJECT_DEPS
       mivisionx

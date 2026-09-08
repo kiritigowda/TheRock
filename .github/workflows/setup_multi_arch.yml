@@ -296,8 +296,24 @@ jobs:
       - name: Build extra cmake options config
         id: extra_cmake_config
         if: ${{ inputs.extra_cmake_options != '' && inputs.external_repo == '' }}
+        env:
+          EXTRA_CMAKE_OPTIONS: ${{ inputs.extra_cmake_options }}
         run: |
-          echo "config_json=$(python3 -c "import json; print(json.dumps({'extra_cmake_options': '${{ inputs.extra_cmake_options }}', 'repository': '', 'ref': '', 'checkout_path': '', 'source_package': '', 'fetch_sources_args': '', 'projects': '', 'family_overrides': {}}))")" >> "$GITHUB_OUTPUT"
+          python3 - <<'EOF'
+          import json, os
+          config = {
+            "extra_cmake_options": os.environ["EXTRA_CMAKE_OPTIONS"],
+            "repository": "",
+            "ref": "",
+            "checkout_path": "",
+            "source_package": "",
+            "fetch_sources_args": "",
+            "projects": "",
+            "family_overrides": {},
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"config_json={json.dumps(config)}\n")
+          EOF
 
       - name: "Quartz - completed ${{ env.QUARTZ_WORKFLOW_POSTFIX }}"
         continue-on-error: true

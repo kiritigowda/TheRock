@@ -177,7 +177,7 @@ STAGE_TO_TEST_LABELS: dict[str, list[str]] = {
     "comm-libs": ["rccl", "rocshmem"],
     "storage-libs": ["hipfile"],
     "profiler-apps": ["rocprofiler-systems", "rocprofiler-compute"],
-    "cv-libs": ["rpp", "mivisionx"],
+    "cv-libs": ["rpp"],
     "media-libs": ["rocdecode", "rocjpeg"],
     "debug-tools": ["rocgdb"],
 }

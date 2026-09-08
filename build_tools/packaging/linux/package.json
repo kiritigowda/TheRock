@@ -3385,6 +3385,7 @@
             "Name": "mivisionx",
             "Components": [
               "lib",
+              "run",
               "doc"
             ]
           }
