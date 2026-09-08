@@ -110,4 +110,3 @@ if(THEROCK_ENABLE_MIVISIONX)
       mivisionx
   )
 endif(THEROCK_ENABLE_MIVISIONX)
-

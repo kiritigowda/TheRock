@@ -13,7 +13,7 @@ in `amdrocm-core` and built by default on Linux.
 Depends on the HIP runtime, the half-precision floating-point headers, and
 OpenMP (used to parallelize the host/CPU code paths, not for GPU offload).
 
-Enable flag: `-DTHEROCK_ENABLE_RPP=ON`  
+Enable flag: `-DTHEROCK_ENABLE_RPP=ON`
 Disable group: `-DTHEROCK_ENABLE_CV_LIBS=OFF`
 
 Source: [`rocm-libraries/projects/rpp`](https://github.com/ROCm/rocm-libraries/tree/develop/projects/rpp)
@@ -32,10 +32,10 @@ Source: [`github.com/ROCm/MIVisionX`](https://github.com/ROCm/MIVisionX)
 
 ## Platform support
 
-| Library    | Linux default | Windows |
-|------------|--------------|---------|
-| RPP        | ✅ Built by default | 🟡 Experimental; opt-in via `-DTHEROCK_ENABLE_RPP=ON` |
-| MIVisionX  | ⚪ Opt-in via `-DTHEROCK_ENABLE_MIVISIONX=ON` | ❌ Unsupported |
+| Library   | Linux default                                 | Windows                                               |
+| --------- | --------------------------------------------- | ----------------------------------------------------- |
+| RPP       | ✅ Built by default                           | 🟡 Experimental; opt-in via `-DTHEROCK_ENABLE_RPP=ON` |
+| MIVisionX | ⚪ Opt-in via `-DTHEROCK_ENABLE_MIVISIONX=ON` | ❌ Unsupported                                        |
 
 The Windows CI pipeline does not build cv-libs.
 
