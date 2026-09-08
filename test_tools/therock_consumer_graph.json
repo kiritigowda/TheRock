@@ -117,7 +117,8 @@
       "rocthrust",
       "roctracer",
       "rocwmma",
-      "rpp"
+      "rpp",
+      "mivisionx"
     ]
   },
   "hip-tests": {
@@ -369,7 +370,8 @@
     "consumers": [
       "composable_kernel",
       "miopen",
-      "rpp"
+      "rpp",
+      "mivisionx"
     ]
   },
   "rocm-kpack": {
@@ -527,6 +529,11 @@
     "consumers": []
   },
   "rpp": {
+    "consumers": [
+      "mivisionx"
+    ]
+  },
+  "mivisionx": {
     "consumers": []
   },
   "therock-amd-mesa": {

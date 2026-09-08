@@ -226,6 +226,7 @@ minimal build):
 | `-DTHEROCK_ENABLE_ROCJPEG=ON`          | Enables rocJPEG JPEG decoder (Linux only)           |
 | `-DTHEROCK_ENABLE_ROCJITSU=ON`         | Enables ROCm emulation tools (Linux only)           |
 | `-DTHEROCK_ENABLE_RPP=ON`              | Enables RPP (Windows: experimental, off by default) |
+| `-DTHEROCK_ENABLE_MIVISIONX=ON`        | Enables MIVisionX computer vision toolkit (Linux only, opt-in extension) |
 
 hipDNN provider plugins:
 
