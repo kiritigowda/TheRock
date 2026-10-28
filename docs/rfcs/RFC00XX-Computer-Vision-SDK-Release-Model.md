@@ -55,18 +55,18 @@ install locations, and versioning are all inherited from the Core SDK
   individual components still version their APIs and ABIs independently
   from the package version that follows the ROCm Core SDK.
 - **Streams:** the CV SDK is present on the same streams as Core
-  (`dev`, `nightly`, `rc`, `stable`) by virtue of being built with
+  (`dev`, `nightly`, `weekly`, `rc`, `stable`) by virtue of being built with
   Core. It does not define its own streams or retention rules.
 
 ## Repo placement
 
 The CV SDK has an independent repository from `TheRock` under the
 `rocm` GitHub organization, namely `rocm-vision`. Both its component
-packages and its tarball are published under the Core SDK's existing
-`core/` location on each stream subdomain, alongside the equivalent
-Core SDK artifacts. The `amdrocm-repo-<stream>` packages that already
-configure Core also surface the CV SDK components — no additional
-repo wiring is needed.
+packages and its tarball are published as peers alongside the Core
+SDK's existing `core/` location under each stream subdomain's `rocm/`
+tree. The `amdrocm-repo-<stream>` packages that already configure
+Core also surface the CV SDK components — no additional repo wiring
+is needed.
 
 ## Install location
 
@@ -97,7 +97,8 @@ component at the exact version shipped in that Core release.
   dependencies resolve against the Core SDK version already on the
   system (or are pulled from the same stream).
 
-- Available in wheel, rpm, and deb formats for every supported distro.
+- Available in wheel, rpm, deb, exe, and msi formats as applicable
+  for every supported distro.
 
 - Component list is owned by the CV SDK team and reviewed each
   release so new components are added to the meta-package
@@ -135,8 +136,8 @@ the Core SDK, CV SDK, and HPC SDK tarballs.
 **Definition.** The HPC-CV SDK tarball is a **superset of the ROCm Core
 SDK, CV SDK, and HPC SDK tarballs**. It contains:
 
-- every component **included in the HPC SDK** (the components covered
-  by the `amdrocm-hpc` meta-package), **and**
+- every component **included in the HPC SDK** (including the development
+  packages covered by the `amdrocm-hpc-sdk` meta-package), **and**
 - every component **included in the CV SDK** (the components covered
   by the `amdrocm-vision` meta-package), **and**
 - **every component of the ROCm Core SDK** — the full contents of the
@@ -185,8 +186,8 @@ and it does not require the Core SDK tarball to be extracted first.
 CV SDK component packages follow the **same versioning and naming as
 all other Core SDK components** — there is no CV-specific scheme.
 Naming follows the Core SDK convention
-(`amdrocm-<component>[-<target>]-<version>-<pkgrel>.<arch>.<ext>`,
-e.g. `amdrocm-rocal-gfx1152-10.1.0-1.x86_64.rpm`), with `<version>`
+(`amdrocm-<component><major.minor>[-<target>]-<version>-<pkgrel>.<arch>.<ext>`,
+e.g. `amdrocm-rocal2.5-gfx1152-10.1.0-1.x86_64.rpm`), with `<version>`
 matching the Core SDK, and by extension CV SDK, release.
 
 ## Components
