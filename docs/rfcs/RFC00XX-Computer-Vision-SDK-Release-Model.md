@@ -28,10 +28,10 @@ status: draft
 ## Overview
 
 The AMD Computer Vision SDK is a ROCm expansion which is built and
-release ***together with the ROCm Core SDK and the HPC SDK**. Its
-components are built on the release train, carry the same version
-as the Core SDK, ship on the same streams, and installs to the same
-locations as any other Core SDK component.
+release ***together with the ROCm Core SDK**. Its components are
+built on the release train, carry the same version as the Core SDK,
+ship on the same streams, and installs to the same locations as any
+other Core SDK component.
 
 The only thing that sets the CV SDK apart from the rest of Core is
 packaging: its components are grouped into a separate **`amdrocm-vision`
@@ -129,57 +129,32 @@ is a thin opt-in meta-package that depends on an existing Core SDK
 install. Tarballs have no dependency resolver, so the only way to
 deliver a usable CV SDK by tarball is to ship the full stack.
 
-An additional tarbal containing both the CV and HPC components in
-addition to the content of the Core SDK tarball is published alongside
-the Core SDK, CV SDK, and HPC SDK tarballs.
-
-**Definition.** The HPC-CV SDK tarball is a **superset of the ROCm Core
-SDK, CV SDK, and HPC SDK tarballs**. It contains:
-
-- every component **included in the HPC SDK** (including the development
-  packages covered by the `amdrocm-hpc-sdk` meta-package), **and**
-- every component **included in the CV SDK** (the components covered
-  by the `amdrocm-vision` meta-package), **and**
-- **every component of the ROCm Core SDK** — the full contents of the
-  matching Core SDK tarball.
-
-They are therefore **self-contained**: extracting the CV SDK tarball,
-or the HPC-CV tarball, yields a complete, working ROCm Core SDK install
-plus the CV SDK components. It is not an overlay or an add-on archive,
-and it does not require the Core SDK tarball to be extracted first.
-
 **Consequences:**
 
-- The Core SDK tarball, HPC-CV tarball, and CV SDK tarball are
-  **alternatives, not companions** — a user picks one. Extracting both
-  into the same prefix is redundant, not additive.
+- The Core SDK tarball and the CV SDK tarball are **alternatives, not
+  companions** — a user picks one. Extracting both into the same
+  prefix is redundant, not additive.
 
-- The three tarballs carry the **same version** and are produced from
-  the same build, so the Core SDK content in both the HPC-CV tarball and
-  in the CV tarball is bit-identical to the standalone Core SDK tarball
-  of that release.
+- The two tarballs carry the **same version** and are produced from
+  the same build, so the Core SDK content in the CV tarball is
+  bit-identical to the standalone Core SDK tarball of that release.
 
-- The HPC-CV tarball and CV SDK tarball is produced for the **same targets,
-  OSes, and streams** as the Core SDK tarball, with no HPC-CV/CV-specific
-  matrix.
+- The CV SDK tarball is produced for the **same targets, OSes, and
+  streams** as the Core SDK tarball, with no CV-specific matrix.
 
-- Naming follows the Core SDK tarball convention with a
-  **`core+hpc+vision`** or **`core+vision`** discriminator, naming the
-  archive after what it actually contains:
+- Naming follows the Core SDK tarball convention with a **`core+vision`**
+  discriminator, naming the archive after what it actually contains:
 
   ```
-  therock-dist-core+hpc+vision-linux-<target>-<version>.tar.gz
-            # Core SDK with HPC and Vision components
   therock-dist-core+vision-linux-<target>-<version>.tar.gz
             # Core SDK with Vision components
   therock-dist-linux-<target>-<version>.tar.gz          # Core SDK only
   ```
 
-  The `core+hpc+vision` as well as the `core+vision` form is deliberate
-  — it states on the tin that the archive is Core **plus** HPC **plus**
-  CV or Core **plus** CV, so a user who downloads it from
+  The `core+vision` form is deliberate — it states on the tin that the
+  archive is Core **plus** CV, so a user who downloads it from
   `core/tarball/` alongside the Core tarball cannot mistake it for a
-  HPC-and-CV or CV-only add-on.
+  CV-only add-on.
 
 ## Component versioning
 
