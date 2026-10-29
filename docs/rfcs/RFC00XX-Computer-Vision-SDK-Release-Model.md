@@ -46,8 +46,8 @@ install locations, and versioning are all inherited from the Core SDK
 ## Versioning and cadence
 
 - **Cadence:** the CV SDK ships with every ROCm Core SDK release —
-  it is built on the same train. There is no separate CV SDK
-  cadence, schedule, or promotion flow.
+  it is built on the same train. The CV SDK is not bound to the Core
+  SDK cadence, schedule, or promotion flow, but should still follow it.
 - **Versioning:** the CV SDK and its components carry the **same
   version as the ROCm Core SDK release they are built in** (`<X.Y>`,
   e.g. `10.1`; patch releases `<X.Y>.N`, e.g. `10.1.1`). There is no
@@ -62,8 +62,8 @@ install locations, and versioning are all inherited from the Core SDK
 
 The CV SDK has an independent repository from `TheRock` under the
 `rocm` GitHub organization, namely `rocm-vision`. Both its component
-packages and its tarball are published as peers alongside the Core
-SDK's existing `core/` location under each stream subdomain's `rocm/`
+packages and its tarball are published as top-level peers under `vision-sdk`,
+alongside the `core/` location under each stream subdomain's `rocm/`
 tree. The `amdrocm-repo-<stream>` packages that already configure
 Core also surface the CV SDK components — no additional repo wiring
 is needed.
@@ -93,9 +93,10 @@ component at the exact version shipped in that Core release.
   apt install amdrocm-vision
   ```
 
-- Because CV components ship with Core, `amdrocm-vision`'s component
-  dependencies resolve against the Core SDK version already on the
-  system (or are pulled from the same stream).
+- Because CV components are built against a specific Core release,
+  `amdrocm-vision`'s component dependencies must resolve against
+  the Core SDK version already on the system (or are pulled from
+  the same stream).
 
 - Available in wheel, rpm, deb, exe, and msi formats as applicable
   for every supported distro.
@@ -106,10 +107,8 @@ component at the exact version shipped in that Core release.
 
 ## Tarball
 
-The CV SDK is also published as a **tarball**, in the Core SDK's
-existing **`core/tarball/`** location alongside the Core SDK tarball.
-It does not get a separate folder — the two archives are distinguished
-by name, not by path.
+The CV SDK is also published as a **tarball**, in the 
+**`vision-sdk/tarball/`** location.
 
 **Definition.** The CV SDK tarball is a **superset of the ROCm Core
 SDK tarball**. It contains:
@@ -135,9 +134,9 @@ deliver a usable CV SDK by tarball is to ship the full stack.
   companions** — a user picks one. Extracting both into the same
   prefix is redundant, not additive.
 
-- The two tarballs carry the **same version** and are produced from
-  the same build, so the Core SDK content in the CV tarball is
-  bit-identical to the standalone Core SDK tarball of that release.
+- The two tarballs carry the **same version** and the Core SDK content
+  in the CV tarball should be bit-identical to the standalone Core SDK
+  tarball of that release.
 
 - The CV SDK tarball is produced for the **same targets, OSes, and
   streams** as the Core SDK tarball, with no CV-specific matrix.
@@ -146,9 +145,8 @@ deliver a usable CV SDK by tarball is to ship the full stack.
   discriminator, naming the archive after what it actually contains:
 
   ```
-  therock-dist-core+vision-linux-<target>-<version>.tar.gz
-            # Core SDK with Vision components
-  therock-dist-linux-<target>-<version>.tar.gz          # Core SDK only
+  therock-dist-core+vision-linux-<target>-<version>.tar.gz   # Core SDK with Vision components
+  therock-dist-linux-<target>-<version>.tar.gz               # Core SDK only
   ```
 
   The `core+vision` form is deliberate — it states on the tin that the
