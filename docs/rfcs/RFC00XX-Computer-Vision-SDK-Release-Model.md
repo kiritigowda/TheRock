@@ -79,20 +79,13 @@ locations as every other ROCm Core SDK component** (the standard Core
 SDK install prefix, e.g. the `core-<major.minor>` tree). There is no
 `vision-` prefix or separate directory tree.
 
-Two details follow from the CV libraries' dependencies rather than from
-a CV-specific layout:
-
-- **Bundled runtime deps** that the CV libraries need but Core does not
-  ship (e.g. protobuf, libjpeg-turbo, lmdb, libsndfile, libtar) install
-  into the **existing** `lib/rocm_sysdeps/lib/` tree — the same
-  directory Core already uses for zlib/bzip2/etc. — with private SONAMEs
-  so they do not collide with host copies. They ship in a dedicated
-  `amdrocm-vision-sysdeps` package, not a new directory tree.
-- A Python **`.pth`** file is installed into the host interpreter's site
-  directory so the CV Python modules (which land in the ROCm `lib/`
-  tree, not site-packages) import without a manual `PYTHONPATH`. This is
-  the one file that lands outside the Core prefix, and it is owned by a
-  dedicated `amdrocm-vision-pythonpath` package.
+One detail follows from the CV libraries' dependencies rather than from
+a CV-specific layout: **bundled runtime deps** that the CV libraries
+need but Core does not ship (e.g. protobuf, libjpeg-turbo, lmdb,
+libsndfile, libtar) install into the **existing** `lib/rocm_sysdeps/lib/`
+tree — the same directory Core already uses for zlib/bzip2/etc. — with
+private SONAMEs so they do not collide with host copies. They ship in a
+dedicated `amdrocm-vision-sysdeps` package, not a new directory tree.
 
 ## Meta-package
 
